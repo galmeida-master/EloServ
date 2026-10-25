@@ -317,6 +317,38 @@ export function convidarProfissional({ empresaId, nome, email }, opcoes = {}) {
   }, opcoes);
 }
 
+/** Convite público (tela de aceite): devolve apenas dados mínimos. Vencido ou revogado → situação correspondente. */
+export function lerConvite(profissionalId, t = agora()) {
+  const e = ler();
+  const p = e.profissionais.find(x => x.id === profissionalId);
+  if (!p || !['convite', 'convite_expirado'].includes(p.situacao)) return { situacao: 'invalido' };
+  const emp = empresaDe(e, p.empresaId);
+  const vencido = p.situacao === 'convite_expirado' || emMs(p.conviteExpiraEm) <= t;
+  return { situacao: vencido ? 'expirado' : 'valido', nome: p.nome, empresaNome: emp ? emp.nome : '—', expiraEm: p.conviteExpiraEm, fuso: emp ? emp.fuso : undefined };
+}
+
+/** Aceite do convite: cria a conta do técnico (credencial simulada) e ativa o vínculo com a empresa. */
+export function aceitarConvite({ profissionalId, senha, termos }, opcoes = {}) {
+  return executar('aceitarConvite', tx => {
+    const p = tx.exigir('profissionais', profissionalId, 'Convite inválido ou revogado.');
+    if (p.situacao !== 'convite' || emMs(p.conviteExpiraEm) <= tx.agora) throw falhar('CONVITE_EXPIRADO', 'Este convite expirou ou foi revogado. Peça ao responsável pela empresa um novo convite.');
+    const erros = {};
+    if (String(senha || '').length < 8) erros.senha = 'A credencial precisa ter ao menos 8 caracteres.';
+    if (!termos) erros.termos = 'É necessário aceitar os termos para continuar.';
+    if (Object.keys(erros).length) throw falhar('VALIDACAO', 'Revise os campos destacados.', { campos: erros });
+    const emp = empresaDe(tx.estado, p.empresaId);
+    let u = tx.estado.usuarios.find(x => x.email === p.email);
+    const vinculo = { tipo: 'empresa', empresaId: p.empresaId, papel: 'tecnico', profissionalId: p.id, situacao: 'ativo' };
+    if (u) tx.alterar('usuarios', u, { vinculos: [...u.vinculos.filter(v => !(v.tipo === 'empresa' && v.empresaId === p.empresaId)), vinculo] });
+    else u = tx.inserir('usuarios', { id: tx.id('u'), nome: p.nome, email: p.email, telefone: '', situacao: 'ativo', vinculos: [vinculo], rotuloPapel: 'técnico, ' + (emp ? emp.nome : ''), criadoEm: iso(tx.agora), preferencias: { emailAtendimentos: true, marketing: false } });
+    tx.alterar('profissionais', p, { situacao: 'ativo', usuarioId: u.id, jornada: p.jornada || (emp ? emp.jornadaPadrao : null), historico: [...p.historico, linha(tx, 'Convite aceito. Vínculo ativo como técnico.')] });
+    for (const g of gestoresDa(tx.estado, p.empresaId)) tx.notificar(g.id, { titulo: 'Convite aceito', texto: `${p.curto} entrou na equipe`, href: '#/empresas/profissionais/' + p.id, icone: 'user-plus' });
+    tx.ator = u;
+    tx.auditar({ entidade: `Profissional ${p.curto}`, acao: 'Convite aceito', tipo: 'convite', empresaId: p.empresaId });
+    return ok({ usuarioId: u.id });
+  }, opcoes);
+}
+
 export function reenviarConvite({ profissionalId }, opcoes = {}) {
   return executar('reenviarConvite', tx => {
     const p = tx.exigir('profissionais', profissionalId);

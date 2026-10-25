@@ -3,6 +3,8 @@
 import { h, Botao, Campo, Check, Alerta, Vazio, icone } from '../../ui/components.js';
 import { estadoView, set, render, navegar, toast } from '../../store.js';
 import * as auth from '../../api/auth.js';
+import { lerConvite, aceitarConvite } from '../../api/companies.js';
+import { formatarPrazo } from '../../domain/datas.js';
 
 const ambienteDaRota = r => (r && r.startsWith('/clientes') ? 'clientes' : r && r.startsWith('/empresas') ? 'empresas' : r && r.startsWith('/admin') ? 'admin' : r && r.includes('/solicitar') ? 'clientes' : null);
 const destino = (volta, ambiente) => (volta && volta.startsWith('/') && !volta.startsWith('//') ? volta : auth.rotaInicial(ambiente));
@@ -133,4 +135,36 @@ export function PermissaoInsuficiente() {
 
 export function NaoEncontrada() {
   return h('div', { class: 'card' }, Vazio({ nivel: 'h1', icone: 'question', titulo: 'Página não encontrada', texto: 'O endereço pode ter mudado ou não existir.', acoes: [Botao({ texto: 'Voltar ao início', href: '#/' })] }));
+}
+
+/** Aceite de convite para a equipe (RF-ACS-03: estado “convite expirado”). */
+export function Convite({ params }) {
+  const c = lerConvite(params.id);
+  const st = estadoView('form:convite:' + params.id, () => ({ senha: '', termos: false, erros: {}, busy: false, erro: null }));
+  if (c.situacao !== 'valido') {
+    return h('div', { style: 'margin:0 auto;max-width:560px;width:100%' }, h('div', { class: 'card' }, Vazio({ nivel: 'h1', icone: 'envelope-simple',
+      titulo: c.situacao === 'expirado' ? 'Convite expirado' : 'Convite inválido ou expirado',
+      texto: c.situacao === 'expirado' ? `O convite para ${c.empresaNome} expirou. Peça ao responsável pela empresa que reenvie o convite.` : 'Este convite expirou, foi revogado ou não existe. Peça ao responsável pela empresa um novo convite.',
+      acoes: [Botao({ texto: 'Ir para o início', href: '#/' })] })));
+  }
+  const aceitar = async e => {
+    e.preventDefault();
+    if (st.busy) return;
+    set(st, { busy: true, erro: null, erros: {} });
+    const r = await aceitarConvite({ profissionalId: params.id, senha: st.senha, termos: st.termos }, { ator: null });
+    st.busy = false;
+    if (!r.ok) { if (r.code === 'VALIDACAO') st.erros = r.details.campos; else st.erro = r.message; render(); return; }
+    auth.entrarComoPersona(r.data.usuarioId);
+    toast('Convite aceito. Boas-vindas à equipe.');
+    navegar('/empresas/agenda');
+  };
+  return h('div', { style: 'margin:0 auto;max-width:560px;width:100%' }, h('div', { class: 'card stack' },
+    h('h1', null, 'Convite para a equipe'),
+    h('p', null, `${c.nome}, você recebeu um convite para a equipe de ${c.empresaNome} como técnico(a).`),
+    h('p', { class: 'small text2' }, `O convite vale até ${formatarPrazo(c.expiraEm, c.fuso)}. Técnicos acessam apenas a própria agenda, os atendimentos atribuídos, o registro de execução e a ajuda.`),
+    st.erro ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erro)) : null,
+    h('form', { class: 'stack', onSubmit: aceitar, novalidate: true },
+      Campo({ id: 'conv-senha', rotulo: 'Crie uma credencial', tipo: 'password', obrigatorio: true, valor: st.senha, onInput: v => { st.senha = v; }, erro: st.erros.senha, autocomplete: 'new-password', ajuda: 'Demonstração: mínimo de 8 caracteres; não há verificação real.' }),
+      Check({ id: 'conv-termos', rotulo: 'Li e aceito os termos de uso e a política de privacidade.', obrigatorio: true, marcado: st.termos, onChange: v => set(st, { termos: v }), erro: st.erros.termos }),
+      Botao({ texto: 'Aceitar convite', variante: 'primary', tipo: 'submit', ocupado: st.busy, textoOcupado: 'Ativando acesso…' }))));
 }

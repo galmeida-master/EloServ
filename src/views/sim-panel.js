@@ -95,6 +95,7 @@ export function PainelSimulacao() {
           Botao({ texto: 'Catálogo com erro de conexão', pequeno: true, onClick: () => { definirSim({ falharCatalogo: true }); fechar(); navegar('/fornecedores?r=' + Date.now()); } }),
           Botao({ texto: 'Busca sem resultados (Cáceres)', pequeno: true, onClick: () => { fechar(); navegar('/fornecedores?cidade=C%C3%A1ceres'); } }),
           Botao({ texto: 'Sessão expirada', pequeno: true, onClick: () => { auth.expirarSessaoAgora(); fechar(); toast('Sessão marcada como expirada. Navegue para uma área autenticada.', 'info'); render(); } }),
+          Botao({ texto: 'Convite expirado', pequeno: true, onClick: () => { fechar(); navegar('/convite/convite-expirado-demo'); } }),
           Botao({ texto: 'Página não encontrada', pequeno: true, onClick: () => { fechar(); navegar('/pagina-inexistente'); } }))),
 
       h('section', { class: 'sim-section', 'aria-labelledby': 'sim-email' },

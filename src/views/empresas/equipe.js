@@ -134,6 +134,7 @@ export function Profissional({ params, usuario, empresaId }) {
       p.situacao === 'suspenso' ? h('div', { class: 'stack-sm' }, h('p', { class: 'text2' }, 'Acesso suspenso. Atendimentos atribuídos foram tratados; a gestão continua vendo o histórico.'),
         st.enc ? null : h('div', { class: 'row' }, Botao({ texto: 'Reativar acesso', variante: 'primary', ocupado: st.busy, onClick: () => chamar(() => comp.reativarProfissional({ profissionalId: p.id }), 'Acesso reativado.') }), Botao({ texto: 'Revogar acesso', variante: 'danger', onClick: () => abrirEnc('revogar') }))) : null,
       ['convite', 'convite_expirado'].includes(p.situacao) ? h('div', { class: 'stack-sm' },
+        p.situacao === 'convite' ? h('p', { class: 'small' }, 'Link do convite (demonstração): ', h('a', { href: '#/convite/' + p.id }, 'abrir a tela de aceite')) : null,
         h('p', { class: 'text2' }, p.situacao === 'convite' ? `Convite enviado em ${formatarData(p.conviteEm, fuso)}, ainda não aceito. Expira em ${formatarData(p.conviteExpiraEm, fuso)}.` : 'Convite expirado sem aceite.'),
         h('div', { class: 'row' }, Botao({ texto: 'Reenviar convite', icone: 'envelope-simple', ocupado: st.busy, onClick: () => chamar(() => comp.reenviarConvite({ profissionalId: p.id }), 'Convite reenviado (demonstração).', 'info') }),
           Botao({ texto: 'Revogar convite', variante: 'danger', ocupado: st.busy, onClick: () => chamar(() => comp.revogarConvite({ profissionalId: p.id }), 'Convite revogado.', 'info') }))) : null,

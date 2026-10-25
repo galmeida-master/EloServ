@@ -30,6 +30,8 @@ Outras regras adotadas:
 - **Habilitar/suspender/reativar/arquivar empresa**: níveis Principal e Operações; Suporte não. Justificativa mínima de 10 caracteres em todas as ações sensíveis.
 - **“Habilitada recentemente”** no catálogo: até 7 dias após a habilitação.
 - **Revogação de profissional** remove seus bloqueios internos futuros; suspensão os mantém.
+- **Aceite de convite** em `/convite/:id` (rota adicional, não listada no PRD §4) para cobrir o estado “convite expirado” (RF-ACS-03). Como não há e-mail real, o link do convite aparece na tela do profissional convidado.
+- **Rotas extras de estado**: `/sessao-expirada` e `/acesso-negado`, como no mapa de navegação do handoff.
 
 ## 3. Divergências entre PRD e protótipo (e escolhas)
 

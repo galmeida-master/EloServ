@@ -17,6 +17,7 @@ export const ROTAS = [
   ['/recuperar-acesso', 'recuperar', null],
   ['/sessao-expirada', 'sessaoExpirada', null],
   ['/acesso-negado', 'acessoNegado', null],
+  ['/convite/:id', 'convite', null],
 
   ['/clientes', 'cliVisao', 'clientes'],
   ['/clientes/solicitacoes', 'cliSolicitacoes', 'clientes'],

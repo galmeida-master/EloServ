@@ -4,14 +4,14 @@ import { Catalogo } from './public/catalogo.js';
 import { PerfilFornecedor } from './public/perfil.js';
 import { Solicitar } from './public/solicitar.js';
 import { CentralAjuda, Artigo } from './public/ajuda.js';
-import { Entrar, Cadastro, Recuperar, SessaoExpirada, AcessoNegado, NaoEncontrada } from './public/acesso.js';
+import { Entrar, Cadastro, Recuperar, SessaoExpirada, AcessoNegado, NaoEncontrada, Convite } from './public/acesso.js';
 import * as cli from './clientes/index.js';
 import * as emp from './empresas/index.js';
 import * as adm from './admin/index.js';
 
 export const VIEWS = {
   inicio: Inicio, catalogo: Catalogo, perfil: PerfilFornecedor, solicitar: Solicitar, ajuda: CentralAjuda, artigo: Artigo,
-  entrar: Entrar, cadastro: Cadastro, recuperar: Recuperar, sessaoExpirada: SessaoExpirada, acessoNegado: AcessoNegado, naoEncontrada: NaoEncontrada,
+  entrar: Entrar, cadastro: Cadastro, recuperar: Recuperar, sessaoExpirada: SessaoExpirada, acessoNegado: AcessoNegado, naoEncontrada: NaoEncontrada, convite: Convite,
   cliVisao: cli.Visao, cliSolicitacoes: cli.Solicitacoes, cliSolicitacao: cli.Solicitacao, cliAgendamentos: cli.Agendamentos, cliEquipamentos: cli.Equipamentos,
   cliHistorico: cli.Historico, cliPerfil: cli.Perfil, cliPreferencias: cli.Preferencias,
   empVisao: emp.Visao, empPerfil: emp.Perfil, empServicos: emp.Servicos, empProdutos: emp.Produtos, empProfissionais: emp.Profissionais, empProfissional: emp.Profissional,
@@ -23,7 +23,7 @@ export const VIEWS = {
 
 export const TITULOS = {
   inicio: 'Início', catalogo: 'Fornecedores', perfil: 'Perfil do fornecedor', solicitar: 'Solicitar atendimento', ajuda: 'Central de ajuda', artigo: 'Ajuda',
-  entrar: 'Entrar', cadastro: 'Criar conta', recuperar: 'Recuperar acesso', sessaoExpirada: 'Sessão expirada', acessoNegado: 'Acesso negado', naoEncontrada: 'Página não encontrada',
+  entrar: 'Entrar', cadastro: 'Criar conta', recuperar: 'Recuperar acesso', sessaoExpirada: 'Sessão expirada', acessoNegado: 'Acesso negado', naoEncontrada: 'Página não encontrada', convite: 'Convite',
   cliVisao: 'Visão geral', cliSolicitacoes: 'Solicitações e orçamentos', cliSolicitacao: 'Solicitação', cliAgendamentos: 'Agendamentos', cliEquipamentos: 'Meus equipamentos',
   cliHistorico: 'Histórico', cliPerfil: 'Perfil e endereços', cliPreferencias: 'Preferências',
   empVisao: 'Visão geral', empPerfil: 'Perfil da empresa', empServicos: 'Serviços', empProdutos: 'Produtos', empProfissionais: 'Profissionais', empProfissional: 'Profissional',
