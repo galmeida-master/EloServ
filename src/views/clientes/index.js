@@ -52,7 +52,7 @@ export function Equipamentos({ usuario }) {
     set(st, { busy: true });
     const r = await salvarEquipamento({ ...st.f, versao: st.f.v });
     st.busy = false;
-    if (r.ok) { st.dlg = null; toast(st.f.id ? 'Equipamento atualizado.' : 'Equipamento adicionado.'); } else st.erros = (r.details && r.details.campos) || { tipo: r.message };
+    if (r.ok) { st.dlg = null; toast(st.f.id ? 'Equipamento atualizado.' : 'Equipamento adicionado.'); } else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   return h('div', { class: 'stack' },
@@ -73,7 +73,8 @@ export function Equipamentos({ usuario }) {
       Campo({ id: 'eq-tipo', rotulo: 'Tipo', obrigatorio: true, valor: st.f.tipo, onInput: v => { st.f.tipo = v; }, erro: st.erros.tipo, placeholder: 'Ex.: Split hi-wall', maxlength: 60 }),
       Campo({ id: 'eq-cap', rotulo: 'Capacidade', valor: st.f.capacidade, onInput: v => { st.f.capacidade = v; }, placeholder: 'Ex.: 12.000 BTUs', maxlength: 40 }),
       Campo({ id: 'eq-marca', rotulo: 'Marca e modelo (opcional)', valor: st.f.marca, onInput: v => { st.f.marca = v; }, maxlength: 80 }),
-      Campo({ id: 'eq-local', rotulo: 'Local de instalação', valor: st.f.local, onInput: v => { st.f.local = v; }, maxlength: 60 }))) : null);
+      Campo({ id: 'eq-local', rotulo: 'Local de instalação', valor: st.f.local, onInput: v => { st.f.local = v; }, maxlength: 60 })),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null) : null);
 }
 
 export function Historico({ usuario }) {
@@ -99,8 +100,7 @@ export function Perfil({ usuario }) {
     const r = await salvarPerfil({ ...st.f, versao: st.versao });
     st.busy = false;
     if (r.ok) { st.f = null; st.erros = {}; limparSujo(); toast('Perfil atualizado.'); }
-    else if (r.code === 'CONFLITO_ATUALIZACAO') st.erros = { nome: r.message };
-    else st.erros = (r.details && r.details.campos) || {};
+    else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   const descartar = () => { st.f = base(); st.erros = {}; limparSujo(); render(); };
@@ -109,7 +109,7 @@ export function Perfil({ usuario }) {
     set(st, { busy: true });
     const r = await salvarEndereco(st.end);
     st.busy = false;
-    if (r.ok) { st.dlg = null; toast('Endereço salvo.'); } else st.endErros = (r.details && r.details.campos) || {};
+    if (r.ok) { st.dlg = null; toast('Endereço salvo.'); } else st.endErros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   const privacidade = async tipo => {
@@ -122,6 +122,7 @@ export function Perfil({ usuario }) {
   };
   return h('div', { class: 'stack content-narrow' },
     h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Perfil e endereços'), h('p', null, 'Dados de contato, endereços e preferências de comunicação.'))),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null,
     sujo ? Alerta({ tipo: 'warn', titulo: 'Você tem alterações não salvas.', acoes: [Botao({ texto: 'Descartar', onClick: descartar }), Botao({ texto: 'Salvar', variante: 'primary', ocupado: st.busy, onClick: salvar })] }) : null,
     h('section', { class: 'card stack', 'aria-labelledby': 'pf-dados' }, h('h2', { id: 'pf-dados' }, 'Dados pessoais'),
       h('div', { class: 'form-grid' },
@@ -143,7 +144,8 @@ export function Perfil({ usuario }) {
       Campo({ id: 'end-rotulo', rotulo: 'Identificação', obrigatorio: true, valor: st.end.rotulo, onInput: v => { st.end.rotulo = v; }, erro: st.endErros.rotulo, placeholder: 'Casa, Trabalho…' }),
       Campo({ id: 'end-bairro', rotulo: 'Bairro ou região', obrigatorio: true, valor: st.end.bairro, onInput: v => { st.end.bairro = v; }, erro: st.endErros.bairro }),
       Campo({ id: 'end-cidade', rotulo: 'Cidade', obrigatorio: true, valor: st.end.cidade, onInput: v => { st.end.cidade = v; }, erro: st.endErros.cidade }),
-      Campo({ id: 'end-ref', rotulo: 'Ponto de referência', valor: st.end.referencia, onInput: v => { st.end.referencia = v; } }))) : null,
+      Campo({ id: 'end-ref', rotulo: 'Ponto de referência', valor: st.end.referencia, onInput: v => { st.end.referencia = v; } })),
+    st.endErros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.endErros.geral)) : null) : null,
     st.dlg === 'exportar' ? Dialogo({ id: 'dlg-exportar', titulo: 'Solicitar exportação dos dados', ocupado: st.busy, onFechar: () => set(st, { dlg: null }),
       rodape: [Botao({ texto: 'Cancelar', onClick: () => set(st, { dlg: null }) }), Botao({ texto: 'Solicitar', variante: 'primary', ocupado: st.busy, onClick: () => privacidade('exportacao') })] },
     h('p', null, 'Você receberá um arquivo com seus dados de conta, solicitações e equipamentos. O prazo e o formato seguem a política de privacidade aplicável.')) : null,

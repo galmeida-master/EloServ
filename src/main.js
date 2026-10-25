@@ -54,12 +54,13 @@ function aoTrocarAncora() {
   ui.popover = null;
   ui.menuAberto = false;
   ui.contextoSim = null;
-  if (mudou) { focarTitulo = true; ui.visita = (ui.visita || 0) + 1; window.scrollTo(0, 0); }
+  if (mudou) { focarTitulo = Boolean(ui.iniciado); ui.visita = (ui.visita || 0) + 1; window.scrollTo(0, 0); }
+  ui.iniciado = true;
   render();
 }
 
 function App() {
-  const { r } = rotaAtual();
+  const r = resolver(ui.rota);
   const usuario = auth.usuarioAtual();
   const sessao = auth.lerSessao();
   const ctx = { params: r.params, query: ui.query, usuario, sessao, rota: ui.rota };
@@ -88,6 +89,11 @@ function App() {
 // ---------- Foco e sobreposições (diálogos e painéis) ----------
 let pilha = [];
 const retornos = {};
+// No Safari, clicar não move o foco para o botão: guardamos o último controle acionado para devolver o foco.
+let ultimoAcionado = null;
+let viaPonteiro = false;
+document.addEventListener('pointerdown', e => { const c = e.target.closest && e.target.closest('button, a[href], [tabindex]:not([tabindex="-1"])'); ultimoAcionado = c || null; viaPonteiro = Boolean(c); }, true);
+document.addEventListener('keydown', () => { viaPonteiro = false; }, true);
 const FOCAVEIS = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function aposRenderizar() {
@@ -96,7 +102,8 @@ function aposRenderizar() {
   for (const el of abertos) {
     const id = el.getAttribute('data-overlay');
     if (pilha.includes(id)) continue;
-    retornos[id] = document.activeElement;
+    const ativo = document.activeElement;
+    retornos[id] = viaPonteiro && ultimoAcionado ? ultimoAcionado : ativo && ativo !== document.body && !el.contains(ativo) ? ativo : ultimoAcionado;
     const alvo = el.querySelector('[data-autofocus]') || el.querySelector('.dialog-body input, .dialog-body select, .dialog-body textarea') || el.querySelector('.drawer-body ' + FOCAVEIS) || el.querySelector(FOCAVEIS);
     if (alvo) alvo.focus();
   }

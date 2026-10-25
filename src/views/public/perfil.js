@@ -40,7 +40,7 @@ export function PerfilFornecedor({ params }) {
             h('p', { class: 'small text2' }, s.descricao),
             h('p', { class: 'small' }, `Duração estimada ${duracao(s.duracaoMin)} · ${s.local} · ${TIPOS_PRECO[s.tipoPreco]}`),
             s.observacao ? h('p', { class: 'small muted' }, s.observacao) : null,
-            h('div', null, Botao({ texto: 'Solicitar este serviço', pequeno: true, onClick: () => iniciar({ servicoId: s.id }), rotulo: 'Solicitar ' + s.nome }))))) : h('p', { class: 'muted' }, 'Nenhum serviço ativo no momento.')),
+            h('div', null, Botao({ texto: 'Solicitar este serviço', pequeno: true, onClick: () => iniciar({ servicoId: s.id }), rotulo: 'Solicitar este serviço: ' + s.nome }))))) : h('p', { class: 'muted' }, 'Nenhum serviço ativo no momento.')),
         h('section', { class: 'card stack-sm', 'aria-labelledby': 'perfil-produtos' },
           h('h2', { id: 'perfil-produtos' }, 'Produtos'),
           h('p', { class: 'small text2' }, 'Catálogo informativo. Disponibilidade e preços informados pela empresa; sem compra pela plataforma.'),

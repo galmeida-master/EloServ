@@ -5,7 +5,7 @@
 import { FUSO_PADRAO, HORA, DIA, dataLocal, paraUtc, proximosDiasUteis, somarDias, somarMeses, diaSemanaData } from '../domain/datas.js';
 import { ARTIGOS } from './seed-artigos.js';
 
-export const VERSAO_DADOS = 3;
+export const VERSAO_DADOS = 4;
 
 export const PERSONAS = [
   { id: 'visitante', nome: 'Visitante', descricao: 'Sem conta' },
@@ -331,7 +331,7 @@ export function criarDadosDemonstrativos(agora) {
   const categorias = [r({ id: 'cat-res', nome: 'Climatização residencial' }), r({ id: 'cat-com', nome: 'Refrigeração comercial' })];
 
   return {
-    meta: { versao: VERSAO_DADOS, rev: 0, criadoEm: iso(agora), hoje, diasDemo: dias, seq: { sol: 1041, os: 2210, blq: 8 } },
+    meta: { versao: VERSAO_DADOS, rev: 0, criadoEm: iso(agora), hoje, diasDemo: dias, seq: { sol: 1041, os: 2209, blq: 8 } },
     empresas, servicos, produtos, profissionais, usuarios, ocupacoes, solicitacoes, ordens, equipamentos, enderecos, clientesOp,
     notificacoes, emails: [], auditoria, artigos, categorias, suporte, pedidosPrivacidade: [], acessosTemporarios: [], consultas: [], idem: {}
   };

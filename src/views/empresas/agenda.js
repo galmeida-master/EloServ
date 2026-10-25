@@ -13,10 +13,7 @@ const HORAS = []; for (let m = H0 * 60; m <= H1 * 60; m += 30) HORAS.push(minPar
 
 function segunda(data) { const ds = diaSemanaData(data); return somarDias(data, ds === 0 ? -6 : 1 - ds); }
 
-function rotuloEvento(e) {
-  const tipo = e.estado === 'confirmada' ? 'Confirmada' : e.estado === 'temporaria' ? 'Reserva temporária' : e.estado === 'pendente' ? 'A reatribuir' : 'Bloqueio interno';
-  return `${e.hi} a ${e.hf}, ${tipo}, ${e.ref}${e.titulo ? ', ' + e.titulo : ''}${e.quem ? ', ' + e.quem : ''}`;
-}
+const situacaoEvento = e => (e.estado === 'confirmada' ? 'Confirmada' : e.estado === 'temporaria' ? 'Reserva temporária' : e.estado === 'pendente' ? 'A reatribuir' : 'Bloqueio interno');
 
 export function Agenda({ usuario, empresaId, vinculo }) {
   const emp = empresaDoUsuario(usuario, empresaId);
@@ -46,11 +43,11 @@ export function Agenda({ usuario, empresaId, vinculo }) {
     const ini = minutosLocal(e.inicio, fuso), fim = minutosLocal(e.fim, fuso);
     const estilo = comPosicao ? `top:${((ini - H0 * 60) / 60) * PX}px;height:${Math.max(26, ((fim - ini) / 60) * PX - 2)}px` : '';
     const classe = 'ag-ev ev-' + (e.estado === 'pendente' ? 'pendente' : e.estado) + (e.href || (e.bloqueio && gestor) ? '' : ' static');
-    const filhos = [h('span', { class: 'r' }, `${e.hi}–${e.hf}`), h('span', { class: 'strong' }, `${e.ref}${e.titulo ? ' · ' + e.titulo : ''}`), e.quem ? h('span', { class: 'text2' }, e.quem) : null];
+    const filhos = [h('span', { class: 'r' }, `${e.hi}–${e.hf}`, h('span', { class: 'sr-only' }, ` · ${situacaoEvento(e)} ·`)), h('span', { class: 'strong' }, ` ${e.ref}${e.titulo ? ' · ' + e.titulo : ''}`), e.quem ? h('span', { class: 'text2' }, ' ' + e.quem) : null];
     if (!comPosicao) return null;
-    if (e.href) return h('a', { class: classe, style: estilo, href: e.href, 'aria-label': rotuloEvento(e), key: e.id }, filhos);
-    if (e.bloqueio && gestor) return h('button', { type: 'button', class: classe, style: estilo, 'aria-label': rotuloEvento(e) + '. Abrir detalhes do bloqueio', onClick: () => abrirEvento(e), key: e.id }, filhos);
-    return h('div', { class: classe, style: estilo, role: 'note', 'aria-label': rotuloEvento(e), key: e.id }, filhos);
+    if (e.href) return h('a', { class: classe, style: estilo, href: e.href, key: e.id }, filhos);
+    if (e.bloqueio && gestor) return h('button', { type: 'button', class: classe, style: estilo, onClick: () => abrirEvento(e), key: e.id }, filhos);
+    return h('div', { class: classe, style: estilo, role: 'note', key: e.id }, filhos);
   };
 
   const grade = () => {
@@ -87,12 +84,12 @@ export function Agenda({ usuario, empresaId, vinculo }) {
         Botao({ texto: 'Consultar disponibilidade', icone: 'magnifying-glass', onClick: () => set(st, { disp: !st.disp }), expandido: st.disp, controla: 'painel-disp' }),
         Botao({ texto: 'Bloquear período', icone: 'lock-simple', variante: 'primary', onClick: abrirBloqueio, id: 'btn-bloquear' })) : null),
     h('div', { class: 'row-between' },
-      h('div', { class: 'row' },
+      h('div', { class: 'semana' },
         Botao({ icone: 'caret-left', rotulo: 'Semana anterior', onClick: () => set(st, { data: somarDias(seg, -7) }) }),
         FaixaDatas({ rotulo: 'Dia da agenda', datas: semana, selecionada: st.data, onEscolher: d => set(st, { data: d }), rotuloDe: rotuloDia, contagem }),
         Botao({ icone: 'caret-right', rotulo: 'Próxima semana', onClick: () => set(st, { data: somarDias(seg, 7) }) })),
       Seg({ rotulo: 'Modo de visualização', valor: st.visao, opcoes: [['dia', 'Dia por profissional', 'columns'], ['lista', 'Lista', 'list-bullets']], onChange: v => set(st, { visao: v }) })),
-    h('div', { class: 'agenda-legend', 'aria-label': 'Legenda' },
+    h('div', { class: 'agenda-legend', role: 'group', 'aria-label': 'Legenda' },
       h('span', null, h('span', { class: 'legend-sw ev-confirmada', 'aria-hidden': 'true' }), 'Confirmada'),
       h('span', null, h('span', { class: 'legend-sw ev-temporaria', 'aria-hidden': 'true' }), 'Reserva temporária'),
       h('span', null, h('span', { class: 'legend-sw ev-bloqueio', 'aria-hidden': 'true' }), 'Bloqueio interno ou folga'),

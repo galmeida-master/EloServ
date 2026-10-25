@@ -4,9 +4,12 @@ import { ui, estadoView, render, set, toast } from '../../store.js';
 import { listarCatalogo, opcoesCatalogo, filtrarCatalogo } from '../../api/companies.js';
 
 function carregar(st) {
+  const pedido = (st.pedido || 0) + 1;
+  st.pedido = pedido;
   st.status = 'carregando';
   render();
   listarCatalogo().then(r => {
+    if (pedido !== st.pedido) return; // resposta obsoleta: uma carga mais recente já foi iniciada
     if (r.ok) { st.lista = r.data; st.status = 'ok'; } else { st.status = 'erro'; st.erro = r.message; }
     render();
   });

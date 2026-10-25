@@ -125,7 +125,7 @@ export function Solicitacao({ params, usuario, empresaId }) {
     proposta,
     s.estado === 'proposta' ? Alerta({ tipo: 'info', titulo: 'Aguardando o cliente' }, h('p', null, `Proposta enviada com ${s.propostaProfissional} para ${formatarDataHora(s.proposta.inicio, fuso)}. A reserva temporária segue até ${formatarPrazo(s.proposta.validadeEm, fuso)}. Quando o cliente confirmar, o horário é revalidado e a ordem de serviço é criada.`),
       h('div', null, Botao({ texto: 'Recusar ou encerrar solicitação', variante: 'ghost', pequeno: true, onClick: () => set(st, { dlg: 'recusar', texto: '', res: null }) }))) : null,
-    s.estado === 'aceita' ? Alerta({ tipo: 'ok', titulo: 'Agendamento confirmado' }, h('p', null, `Ordem de serviço ${s.ordemId} · ${formatarDataHora(s.inicio, fuso)} · ${s.profissionalAtual || 'a reatribuir'}.`),
+    s.estado === 'aceita' ? Alerta({ tipo: 'ok', titulo: 'Agendamento confirmado' }, h('p', null, `Ordem de serviço ${s.ordemId} · ${formatarDataHora(s.inicio, fuso)} · Profissional: ${s.profissionalAtual || 'a reatribuir'}`),
       h('div', { class: 'row' }, Botao({ texto: 'Abrir ordem de serviço', href: '#/empresas/ordens/' + s.ordemId }),
         !rg && s.estadoExecucao === 'agendada' ? Botao({ texto: 'Propor novo horário ao cliente', icone: 'calendar-plus', onClick: () => set(st, { dlg: 'reagendar', rsData: diasParaSolicitacao(undefined, { fuso })[0], rsInicio: null, res: null, chave: novaChave() }) }) : null)) : null,
     rg && rg.origem === 'cliente' ? Alerta({ tipo: 'warn', titulo: `Pedido de reagendamento para ${formatarDataHora(rg.novoInicio, fuso)}`,

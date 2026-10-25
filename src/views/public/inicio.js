@@ -14,7 +14,7 @@ export function Inicio() {
           Botao({ texto: 'Encontrar um fornecedor', icone: 'magnifying-glass', variante: 'primary', href: '#/fornecedores' }),
           Botao({ texto: 'Cadastrar minha empresa', icone: 'buildings', href: '#/cadastro?tipo=empresa' })),
         h('p', { class: 'small muted' }, 'Recorte inicial: Mato Grosso, com possibilidade de expansão para o Centro-Oeste.')),
-      h('div', { class: 'card stack-sm', 'aria-label': 'Exemplo demonstrativo de acompanhamento' },
+      h('div', { class: 'card stack-sm', role: 'group', 'aria-label': 'Exemplo demonstrativo de acompanhamento' },
         h('p', { class: 'xsmall muted' }, 'SOL-0000 · exemplo demonstrativo'),
         h('h2', null, 'Higienização de split'),
         h('dl', { class: 'dl' },

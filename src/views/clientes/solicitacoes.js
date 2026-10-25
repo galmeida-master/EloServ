@@ -39,7 +39,7 @@ export function Solicitacoes({ usuario }) {
 }
 
 function trilhas(s) {
-  return h('div', { class: 'tracks', 'aria-label': 'Situações da solicitação' },
+  return h('div', { class: 'tracks', role: 'group', 'aria-label': 'Situações da solicitação' },
     h('div', { class: 'track' }, h('h2', { class: 'k' }, 'Solicitação'), Badge('solicitacao', s.estado)),
     h('div', { class: 'track' }, h('h2', { class: 'k' }, 'Ocupação da agenda'), Badge('ocupacao', s.estadoOcupacao)),
     h('div', { class: 'track' }, h('h2', { class: 'k' }, 'Execução'), Badge('execucao', s.estadoExecucao)));
@@ -90,7 +90,7 @@ export function Solicitacao({ params, usuario }) {
     acoes: [Botao({ texto: 'Aceitar novo horário', variante: 'primary', ocupado: st.busy, onClick: () => chamar(() => req.responderReagendamento({ solicitacaoId: s.id, aceitar: true, versao: s.v }), () => toast('Reagendamento confirmado. Horário anterior liberado.')) }),
       Botao({ texto: 'Manter horário atual', ocupado: st.busy, onClick: () => chamar(() => req.responderReagendamento({ solicitacaoId: s.id, aceitar: false, versao: s.v }), () => toast('Horário original mantido.', 'info')) })] },
   h('p', null, `Seu horário atual (${formatarDataHora(s.inicio, fuso)}) continua reservado até você responder. Prazo: ${formatarPrazo(s.reagendamento.prazo, fuso)}.`)));
-  if (s.estado === 'aceita' && s.estadoExecucao === 'agendada') alertas.push(Alerta({ tipo: 'ok', titulo: 'Agendamento confirmado' }, h('p', null, `${formatarIntervalo(s.inicio, s.fim, fuso)} · ${rotuloFuso(fuso, s.inicio)} · Profissional: ${s.profissionalAtual || 'a definir pela empresa'}.`)));
+  if (s.estado === 'aceita' && s.estadoExecucao === 'agendada') alertas.push(Alerta({ tipo: 'ok', titulo: 'Agendamento confirmado' }, h('p', null, `${formatarIntervalo(s.inicio, s.fim, fuso)} · ${rotuloFuso(fuso, s.inicio)} · Profissional: ${s.profissionalAtual || 'a definir pela empresa'}`)));
   if (s.estadoExecucao === 'concluida') alertas.push(Alerta({ tipo: 'ok', titulo: 'Atendimento concluído' }, h('p', null, s.ordem && s.ordem.proximoRetorno ? `Próximo retorno sugerido pela empresa: ${rotuloMes(s.ordem.proximoRetorno)}.` : 'Sem retorno previsto.')));
   const podeDecidir = s.estado === 'proposta' && !vencida;
   const acoesProposta = podeDecidir ? h('div', { class: 'row' },

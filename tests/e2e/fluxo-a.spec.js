@@ -1,22 +1,7 @@
 // Fluxo A · Cliente contrata: catálogo → perfil → solicitação (visitante, login no meio preservando dados)
 // → revisão → envio → proposta simulada → confirmação → acompanhamento.
 import { test, expect, abrirSimulacao, fecharSimulacao } from './fixtures.js';
-
-export async function preencherSolicitacao(page, { horario = '10:00' } = {}) {
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByLabel('Tipo de equipamento').selectOption('Split hi-wall');
-  await page.getByLabel('Capacidade').selectOption('12.000 BTUs');
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByLabel('Bairro ou região').fill('Jardim Itália');
-  await page.getByLabel('Cidade').fill('Cuiabá');
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByLabel('Descreva a necessidade').fill('Aparelho da sala pingando água na parede desde ontem.');
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await expect(page.getByRole('group', { name: 'Escolha o dia' })).toBeVisible();
-  await page.getByRole('group', { name: /Horários em 26\/10\/2026/ }).getByRole('button', { name: horario, exact: true }).click();
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await expect(page.getByRole('heading', { name: 'Revise sua solicitação' })).toBeVisible();
-}
+import { preencherSolicitacao } from './ajudantes.js';
 
 test('Fluxo A — cliente contrata do catálogo ao agendamento confirmado', async ({ page }) => {
   await test.step('Catálogo → perfil do fornecedor', async () => {
@@ -27,7 +12,7 @@ test('Fluxo A — cliente contrata do catálogo ao agendamento confirmado', asyn
   });
 
   await test.step('Visitante preenche a solicitação', async () => {
-    await page.getByRole('button', { name: 'Solicitar Higienização de split' }).click();
+    await page.getByRole('button', { name: 'Solicitar este serviço: Higienização de split' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Solicitar atendimento' })).toBeVisible();
     await preencherSolicitacao(page);
     await expect(page.getByText('Seg, 26/10/2026 · 10:00 · Horário de Cuiabá (UTC−4)')).toBeVisible();

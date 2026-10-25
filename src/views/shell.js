@@ -53,7 +53,7 @@ export function LayoutPublico(conteudo) {
     BarraDemo(),
     h('header', { class: 'pub-header' },
       h('div', { class: 'inner' },
-        h('a', { href: '#/', class: 'brand', 'aria-label': 'EloServ — início' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'E'), 'EloServ'),
+        h('a', { href: '#/', class: 'brand' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'E'), 'EloServ', h('span', { class: 'sr-only' }, ' — início')),
         h('nav', { class: 'pub-nav desk', 'aria-label': 'Principal' }, linkPublico('/fornecedores', 'Fornecedores'), linkPublico('/ajuda', 'Ajuda'), linkPublico('/cadastro', 'Para empresas')),
         h('div', { class: 'grow' }),
         h('div', { class: 'row pub-actions desk' }, PopAparencia(), ...acoes),
@@ -102,7 +102,7 @@ function navAdmin() {
 
 function itemNav([href, texto, ic, exato, n]) {
   const atual = exato ? ui.rota === href : ui.rota === href || ui.rota.startsWith(href + '/');
-  return h('a', { href: '#' + href, 'aria-current': atual ? 'page' : null }, icone(ic), h('span', null, texto), n ? h('span', { class: 'count', 'aria-label': `${n} pendente${n > 1 ? 's' : ''}` }, String(n)) : null);
+  return h('a', { href: '#' + href, 'aria-current': atual ? 'page' : null }, icone(ic), h('span', null, texto), n ? h('span', { class: 'count' }, String(n), h('span', { class: 'sr-only' }, ` pendente${n > 1 ? 's' : ''}`)) : null);
 }
 
 const AJUDA_POR_ROTA = [
@@ -118,7 +118,7 @@ function contexto(ambiente, u, sessao) {
   if (ambiente === 'admin') { const v = u.vinculos.find(x => x.tipo === 'admin'); return { nome: 'Central de administração', sub: `${u.nome} · ${NIVEIS_ADMIN[v.nivel]}` }; }
   const v = vinculoEmpresa(u, sessao.empresaId) || u.vinculos.find(x => x.tipo === 'empresa');
   const emp = ler().empresas.find(x => x.id === (v && v.empresaId));
-  return { nome: emp ? emp.nome : 'Empresa', sub: `${v && v.papel === 'tecnico' ? 'Técnico' : 'Proprietária(o) e gestão'} · empresa fictícia`, empresa: emp };
+  return { nome: emp ? emp.nome : 'Empresa', sub: `${v && v.papel === 'tecnico' ? 'Técnico' : 'Gestão da empresa'} · empresa fictícia`, empresa: emp };
 }
 
 function PopNotificacoes(u) {
@@ -143,8 +143,7 @@ function PopUsuario(u, sessao, ambiente) {
   const nomeAmb = a => (a.tipo === 'empresas' ? `${(ler().empresas.find(e => e.id === a.empresaId) || {}).nome} · ${a.papel === 'tecnico' ? 'Técnico' : 'Gestão'}` : a.tipo === 'clientes' ? 'Cliente · conta pessoal' : 'Administração · ' + NIVEIS_ADMIN[a.nivel]);
   const trocar = a => { if (auth.trocarAmbiente(a.tipo, a.empresaId)) { ui.popover = null; limparSujo(); navegar(auth.rotaInicial(a.tipo)); } };
   return h('div', { class: 'pop-wrap' },
-    Botao({ texto: h('span', { class: 'hide-mob' }, u.nome), icone: null, variante: 'ghost', onClick: () => alternarPopover('usuario'), controla: 'pop-usuario', expandido: aberto, id: 'btn-usuario', rotulo: 'Menu do usuário: ' + u.nome,
-      extra: {} }),
+    Botao({ texto: h('span', { class: 'hide-mob' }, u.nome), icone: 'user-circle', variante: 'ghost', onClick: () => alternarPopover('usuario'), controla: 'pop-usuario', expandido: aberto, id: 'btn-usuario', rotulo: 'Menu do usuário: ' + u.nome }),
     aberto ? h('div', { class: 'popover', id: 'pop-usuario', role: 'region', 'aria-label': 'Menu do usuário' },
       h('div', { class: 'row', style: 'padding:6px 10px' }, h('span', { class: 'avatar', 'aria-hidden': 'true' }, iniciais(u.nome)), h('div', { class: 'stack-xs' }, h('span', { class: 'strong' }, u.nome), h('span', { class: 'small text2 wrap-anywhere' }, u.email))),
       h('p', { class: 'menu-label' }, 'Ambiente'),
@@ -171,7 +170,7 @@ export function LayoutAmbiente({ ambiente, conteudo, usuario: u, sessao, migalha
     }))
     : null;
   const marca = h('div', { class: 'side-brand' },
-    h('a', { href: '#/', class: 'brand', 'aria-label': 'EloServ — página inicial pública' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'E'), ambiente === 'admin' ? 'EloServ Admin' : 'EloServ'),
+    h('a', { href: '#/', class: 'brand' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'E'), ambiente === 'admin' ? 'EloServ Admin' : 'EloServ', h('span', { class: 'sr-only' }, ' — página inicial pública')),
     h('p', { class: 'ctx-name' }, ctx.nome), h('p', { class: 'ctx-sub' }, ctx.sub),
     ctx.empresa ? Badge('empresa', ctx.empresa.situacao) : null);
   return h('div', { class: 'app' + (ambiente === 'clientes' ? ' with-bottom' : '') },
@@ -181,7 +180,7 @@ export function LayoutAmbiente({ ambiente, conteudo, usuario: u, sessao, migalha
       BarraDemo(),
       h('header', { class: 'topbar' },
         h('span', { class: 'menu-toggle' }, Botao({ icone: 'list', variante: 'ghost', rotulo: 'Abrir menu', onClick: () => set(ui, { menuAberto: true }), controla: 'menu-ambiente', expandido: ui.menuAberto, id: 'btn-menu' })),
-        h('p', { class: 'crumb' }, h('span', { class: 'env' }, NOMES_AMBIENTE[ambiente] + (migalha ? ' › ' : '')), migalha ? h('span', null, migalha) : null),
+        h('p', { class: 'crumb' }, h('span', { class: 'env' + (migalha ? ' hide-mob' : '') }, NOMES_AMBIENTE[ambiente] + (migalha ? ' › ' : '')), migalha ? h('span', null, migalha) : null),
         h('div', { class: 'grow' }),
         Botao({ icone: 'question', variante: 'ghost', rotulo: 'Ajuda sobre esta tela', onClick: () => set(ui, { ajuda: ajudaDaRota(ui.rota), popover: null }), id: 'btn-ajuda-contextual' }),
         PopNotificacoes(u),

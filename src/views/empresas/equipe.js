@@ -18,7 +18,7 @@ export function Profissionais({ usuario, empresaId }) {
     set(st, { busy: true, erros: {} });
     const r = await comp.convidarProfissional({ empresaId, nome: st.nome, email: st.email });
     st.busy = false;
-    if (r.ok) { st.dlg = null; st.nome = ''; st.email = ''; toast('Convite enviado. Ele aparece como pendente até o aceite.'); } else st.erros = (r.details && r.details.campos) || { nome: r.message };
+    if (r.ok) { st.dlg = null; st.nome = ''; st.email = ''; toast('Convite enviado. Ele aparece como pendente até o aceite.'); } else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   return h('div', { class: 'stack' },
@@ -35,7 +35,8 @@ export function Profissionais({ usuario, empresaId }) {
       rodape: [Botao({ texto: 'Cancelar', onClick: () => set(st, { dlg: null }) }), Botao({ texto: 'Enviar convite', variante: 'primary', ocupado: st.busy, onClick: convidar })] },
     Campo({ id: 'conv-nome', rotulo: 'Nome', obrigatorio: true, valor: st.nome, onInput: v => { st.nome = v; }, erro: st.erros.nome, maxlength: 120 }),
     Campo({ id: 'conv-email', rotulo: 'E-mail', tipo: 'email', obrigatorio: true, valor: st.email, onInput: v => { st.email = v; }, erro: st.erros.email, ajuda: 'Use um e-mail fictício terminado em @exemplo.invalid.' }),
-    h('p', { class: 'small text2' }, 'Serviços e jornada são configurados depois do aceite.')) : null);
+    h('p', { class: 'small text2' }, 'Serviços e jornada são configurados depois do aceite.'),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null) : null);
 }
 
 function EditorJornada({ p, usuario, empresaId, st }) {

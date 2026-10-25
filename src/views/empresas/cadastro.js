@@ -72,7 +72,7 @@ export function Servicos({ usuario, empresaId }) {
     set(st, { busy: true });
     const r = await comp.salvarServico({ empresaId, ...st.f, versao: st.f.v });
     st.busy = false;
-    if (r.ok) { st.dlg = null; toast(st.f.id ? 'Serviço atualizado.' : 'Serviço cadastrado e ativo no perfil público.'); } else st.erros = (r.details && r.details.campos) || { nome: r.message };
+    if (r.ok) { st.dlg = null; toast(st.f.id ? 'Serviço atualizado.' : 'Serviço cadastrado e ativo no perfil público.'); } else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   const situacao = async (s, nova) => {
@@ -105,7 +105,8 @@ export function Servicos({ usuario, empresaId }) {
       Campo({ id: 'sv-local', rotulo: 'Local de atendimento', valor: st.f.local, onInput: v => { st.f.local = v; } }),
       Campo({ id: 'sv-tipo', rotulo: 'Tipo de preço', valor: st.f.tipoPreco, onChange: v => { st.f.tipoPreco = v; render(); }, opcoes: Object.entries(TIPOS_PRECO).map(([v, l]) => ({ v, l })), erro: st.erros.tipoPreco }),
       st.f.tipoPreco === 'orcamento' ? h('p', { class: 'hint' }, 'O valor é definido na proposta.') : Campo({ id: 'sv-preco', rotulo: st.f.tipoPreco === 'a_partir' ? 'Valor inicial (R$)' : 'Valor (R$)', valor: st.f.preco, onInput: v => { st.f.preco = v; }, erro: st.erros.preco, inputmode: 'decimal', placeholder: '0,00' }),
-      Campo({ id: 'sv-obs', rotulo: 'Observações (ex.: valor depende de avaliação, cobrança de visita)', linhas: 2, valor: st.f.observacao, onInput: v => { st.f.observacao = v; }, classe: 'full', maxlength: 300 }))) : null);
+      Campo({ id: 'sv-obs', rotulo: 'Observações (ex.: valor depende de avaliação, cobrança de visita)', linhas: 2, valor: st.f.observacao, onInput: v => { st.f.observacao = v; }, classe: 'full', maxlength: 300 })),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null) : null);
 }
 
 export function Produtos({ usuario, empresaId }) {
@@ -116,7 +117,7 @@ export function Produtos({ usuario, empresaId }) {
     set(st, { busy: true });
     const r = await comp.salvarProduto({ empresaId, ...st.f, versao: st.f.v });
     st.busy = false;
-    if (r.ok) { st.dlg = null; toast('Produto salvo.'); } else st.erros = (r.details && r.details.campos) || { nome: r.message };
+    if (r.ok) { st.dlg = null; toast('Produto salvo.'); } else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   return h('div', { class: 'stack' },
@@ -132,7 +133,8 @@ export function Produtos({ usuario, empresaId }) {
     Campo({ id: 'pr-nome', rotulo: 'Nome', obrigatorio: true, valor: st.f.nome, onInput: v => { st.f.nome = v; }, erro: st.erros.nome, maxlength: 100 }),
     Campo({ id: 'pr-desc', rotulo: 'Descrição', linhas: 3, valor: st.f.descricao, onInput: v => { st.f.descricao = v; }, maxlength: 300 }),
     Campo({ id: 'pr-preco', rotulo: 'Preço (opcional)', valor: st.f.preco, onInput: v => { st.f.preco = v; }, erro: st.erros.preco, ajuda: 'Deixe em branco para “sob consulta”.', inputmode: 'decimal' }),
-    Campo({ id: 'pr-disp', rotulo: 'Disponibilidade informada', valor: st.f.disponibilidade, onChange: v => { st.f.disponibilidade = v; }, opcoes: ['Disponível', 'Sob encomenda', 'Indisponível no momento'].map(x => ({ v: x, l: x })) })) : null);
+    Campo({ id: 'pr-disp', rotulo: 'Disponibilidade informada', valor: st.f.disponibilidade, onChange: v => { st.f.disponibilidade = v; }, opcoes: ['Disponível', 'Sob encomenda', 'Indisponível no momento'].map(x => ({ v: x, l: x })) }),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null) : null);
 }
 
 export function Clientes({ usuario, empresaId }) {
@@ -143,7 +145,7 @@ export function Clientes({ usuario, empresaId }) {
     set(st, { busy: true });
     const r = await comp.salvarClienteOperacional({ empresaId, ...st.f });
     st.busy = false;
-    if (r.ok) { st.dlg = null; toast(r.data.convite ? 'Cliente cadastrado. O convite só vale após a confirmação do cliente.' : 'Cliente cadastrado no registro operacional. Nenhuma conta foi criada.'); } else st.erros = (r.details && r.details.campos) || {};
+    if (r.ok) { st.dlg = null; toast(r.data.convite ? 'Cliente cadastrado. O convite só vale após a confirmação do cliente.' : 'Cliente cadastrado no registro operacional. Nenhuma conta foi criada.'); } else st.erros = (r.details && r.details.campos) || { geral: r.message };
     render();
   };
   return h('div', { class: 'stack' },
@@ -161,7 +163,8 @@ export function Clientes({ usuario, empresaId }) {
     Campo({ id: 'cli-nome', rotulo: 'Nome', obrigatorio: true, valor: st.f.nome, onInput: v => { st.f.nome = v; }, erro: st.erros.nome, maxlength: 160 }),
     Campo({ id: 'cli-tel', rotulo: 'Telefone', tipo: 'tel', valor: st.f.telefone, onInput: v => { st.f.telefone = v; }, erro: st.erros.telefone }),
     Campo({ id: 'cli-cidade', rotulo: 'Cidade', valor: st.f.cidade, onInput: v => { st.f.cidade = v; } }),
-    Check({ id: 'cli-convidar', rotulo: 'Enviar convite para o cliente acompanhar pela EloServ', ajuda: 'Simulado. O cliente decide se aceita.', marcado: st.f.convidar, onChange: v => { st.f.convidar = v; render(); } })) : null);
+    Check({ id: 'cli-convidar', rotulo: 'Enviar convite para o cliente acompanhar pela EloServ', ajuda: 'Simulado. O cliente decide se aceita.', marcado: st.f.convidar, onChange: v => { st.f.convidar = v; render(); } }),
+    st.erros.geral ? Alerta({ tipo: 'err', foco: true }, h('p', null, st.erros.geral)) : null) : null);
 }
 
 export function Historico({ usuario, empresaId }) {

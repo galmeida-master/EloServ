@@ -7,3 +7,4 @@ coverage/
 Thumbs.db
 # Artefatos de trabalho locais (prompts e insumos originais) — as referências de produto ficam em docs/
 Artefatos/
+.claude/

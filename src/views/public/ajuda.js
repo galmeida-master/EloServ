@@ -35,7 +35,7 @@ export function CentralAjuda() {
         Seg({ id: 'ajuda-publico', rotulo: 'Público', rotuloVisivel: true, valor: st.pub, opcoes: [['', 'Todos'], ['Clientes', 'Clientes'], ['Empresas', 'Empresas']], onChange: v => set(st, { pub: v }) }),
         h('div', { class: 'stack-xs' }, h('h2', { class: 'label', id: 'cat-titulo' }, 'Categorias'),
           h('ul', { class: 'cat-list', 'aria-labelledby': 'cat-titulo' }, CATEGORIAS_AJUDA.map(c => h('li', null,
-            h('button', { type: 'button', 'aria-pressed': String(st.cat === c), onClick: () => set(st, { cat: st.cat === c ? '' : c }) }, h('span', null, c), h('span', { class: 'small muted', 'aria-label': `${contagem[c]} artigos` }, String(contagem[c])))))))),
+            h('button', { type: 'button', 'aria-pressed': String(st.cat === c), onClick: () => set(st, { cat: st.cat === c ? '' : c }) }, h('span', null, c), h('span', { class: 'small muted' }, String(contagem[c]), h('span', { class: 'sr-only' }, ' artigos')))))))),
       h('section', { class: 'stack', 'aria-label': 'Artigos' },
         h('p', { class: 'small text2', role: 'status' }, `${lista.length} ${lista.length === 1 ? 'artigo' : 'artigos'}`),
         lista.length ? h('ul', { class: 'stack-sm' }, lista.map(a => h('li', { key: a.slug },

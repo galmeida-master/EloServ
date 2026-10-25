@@ -162,8 +162,10 @@ export function FaixaDatas({ rotulo, datas, selecionada, onEscolher, rotuloDe, c
     datas.map(d => {
       const r = rotuloDe(d);
       const n = contagem ? contagem[d] : null;
-      return h('button', { type: 'button', class: 'date-chip', 'aria-pressed': String(d === selecionada), 'aria-label': `${r.completo}${n != null ? ', ' + n + ' atendimentos' : ''}`, onClick: () => onEscolher(d) },
-        h('strong', null, r.curto), h('span', { class: 'tabular' }, r.dataCurta), n != null ? h('span', { class: 'xsmall' }, n + ' atend.') : null);
+      return h('button', { type: 'button', class: 'date-chip', 'aria-pressed': String(d === selecionada), onClick: () => onEscolher(d) },
+        h('strong', { 'aria-hidden': 'true' }, r.curto), h('span', { class: 'tabular', 'aria-hidden': 'true' }, r.dataCurta),
+        n != null ? h('span', { class: 'xsmall', 'aria-hidden': 'true' }, n + ' atend.') : null,
+        h('span', { class: 'sr-only' }, r.completo + (n != null ? `, ${n} atendimento${n === 1 ? '' : 's'}` : '')));
     }));
 }
 
@@ -172,7 +174,7 @@ export function Horarios({ rotulo, slots, selecionado, onEscolher }) {
   return h('div', { class: 'slots', role: 'group', 'aria-label': rotulo },
     slots.map(s => (s.livre
       ? h('button', { type: 'button', class: 'slot', 'aria-pressed': String(s.inicio === selecionado), onClick: () => onEscolher(s) }, h('span', { class: 'tabular' }, s.hora))
-      : h('button', { type: 'button', class: 'slot busy', disabled: true, 'aria-label': s.hora + ' indisponível' }, h('span', { class: 'tabular' }, s.hora), h('span', { class: 'lbl' }, 'Indisponível')))));
+      : h('button', { type: 'button', class: 'slot busy', disabled: true }, h('span', { class: 'tabular' }, s.hora), h('span', { class: 'lbl' }, h('span', { class: 'sr-only' }, ' '), 'Indisponível')))));
 }
 
 // ---------- Tabela (padrão docs/Padrão de tabelas.md) ----------

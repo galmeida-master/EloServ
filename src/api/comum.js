@@ -54,6 +54,7 @@ export const intervalo = (ini, fim, fuso) => formatarIntervalo(ini, fim, fuso);
 export const prazo = (iso, fuso) => formatarPrazo(iso, fuso);
 export const fusoRotulo = (fuso, instante) => rotuloFuso(fuso, instante ? emMs(instante) : agora());
 
-export function linha(tx, texto) { return { quando: new Date(tx.agora).toISOString(), texto }; }
+/** Entrada de linha do tempo (evita “..” quando a frase termina em nome abreviado, ex.: “Marina D.”). */
+export function linha(tx, texto) { return { quando: new Date(tx.agora).toISOString(), texto: texto.replace(/\.\.(?!\.)/g, '.') }; }
 
 export { ler, falhar };

@@ -46,7 +46,7 @@ export async function comoPersona(page, usuarioId, rota = null) {
     return auth.entrarComoPersona(id);
   }, usuarioId);
   const destino = rota || (ambiente === 'empresas' ? '/empresas' : ambiente === 'admin' ? '/admin' : '/clientes');
-  await page.goto('/#' + destino);
+  await page.goto(`/?persona=${encodeURIComponent(usuarioId)}#${destino}`);
   await page.waitForFunction(() => document.documentElement.getAttribute('data-pronto') === 'true');
   return ambiente;
 }
