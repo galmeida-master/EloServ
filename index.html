@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark" data-density="comfort">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EloServ — Organize seus serviços</title>
+  <meta name="description" content="EloServ: catálogo, disponibilidade, solicitação, confirmação e histórico de serviços de climatização e refrigeração. Demonstração com dados fictícios.">
+  <meta name="color-scheme" content="dark light">
+  <!-- Tema e densidade aplicados antes da primeira renderização (sem flash). -->
+  <script>(function(){var d=document.documentElement,t='dark',n='comfort';try{t=localStorage.getItem('eloserv.theme')||'dark';n=localStorage.getItem('eloserv.density')||'comfort';}catch(e){}var l=false;try{l=window.matchMedia('(prefers-color-scheme: light)').matches;}catch(e){}var r=t==='system'?(l?'light':'dark'):(t==='light'?'light':'dark');d.setAttribute('data-theme',r);d.setAttribute('data-density',n==='compact'?'compact':'comfort');try{if(window.matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0){d.setAttribute('data-touch','true');}}catch(e){}})();</script>
+  <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='16' font-weight='700' text-anchor='middle' fill='white'%3EE%3C/text%3E%3C/svg%3E">
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <div id="app">
+    <p class="boot muted">Carregando a demonstração da EloServ…</p>
+    <noscript>
+      <p>A demonstração da EloServ precisa de JavaScript habilitado no navegador.</p>
+    </noscript>
+  </div>
+</body>
+</html>

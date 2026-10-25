@@ -1,0 +1,9 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+.DS_Store
+Thumbs.db
+# Artefatos de trabalho locais (prompts e insumos originais) — as referências de produto ficam em docs/
+Artefatos/

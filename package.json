@@ -1,0 +1,32 @@
+{
+  "name": "eloserv-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EloServ — MVP navegável (HTML, CSS e JavaScript estáticos) com servidor simulado no navegador.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.8"
+  },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "lint": "npm run lint:js && npm run lint:html",
+    "lint:js": "eslint .",
+    "lint:html": "html-validate index.html 404.html",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test --experimental-test-coverage --test-coverage-include=src/domain/** --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=90 \"tests/unit/**/*.test.js\"",
+    "test:e2e": "playwright test",
+    "icons": "node scripts/build-icons.mjs",
+    "fonts": "node scripts/copy-fonts.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@eslint/js": "10.0.1",
+    "@fontsource-variable/inter": "5.3.0",
+    "@phosphor-icons/core": "2.1.1",
+    "@playwright/test": "1.64.1",
+    "eslint": "10.13.0",
+    "globals": "17.13.0",
+    "html-validate": "11.17.0"
+  }
+}

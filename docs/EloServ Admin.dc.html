@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EloServ — Central de administração (protótipo)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<script>(function(){try{var t=localStorage.getItem('eloserv.theme')||'dark',d=localStorage.getItem('eloserv.density')||'comfort';var r=t==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):t;document.documentElement.setAttribute('data-theme',r);document.documentElement.setAttribute('data-density',d);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+<script src="eloserv-data.js"></script>
+<style>
+:root{--r1:4px;--r2:6px;--r3:10px;--font:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+:root,[data-theme="dark"]{color-scheme:dark;--bg:#0B1120;--surface:#111827;--raised:#1F2937;--field:#0B1120;--border:#1E293B;--border-strong:#334155;--text:#F8FAFC;--text2:#CBD5E1;--muted:#94A3B8;--accent:#2563EB;--accent-hover:#1D4ED8;--on-accent:#FFFFFF;--accent-text:#93C5FD;--accent-soft:rgba(59,130,246,.16);--ok:#4ADE80;--ok-soft:rgba(34,197,94,.14);--warn:#FBBF24;--warn-soft:rgba(245,158,11,.14);--err:#FCA5A5;--err-soft:rgba(239,68,68,.16);--neu:#CBD5E1;--neu-soft:rgba(148,163,184,.16);--focus:#93C5FD;--overlay:rgba(2,6,23,.72);--shadow:0 12px 32px rgba(0,0,0,.5)}
+[data-theme="light"]{color-scheme:light;--bg:#F8FAFC;--surface:#FFFFFF;--raised:#F1F5F9;--field:#FFFFFF;--border:#E2E8F0;--border-strong:#CBD5E1;--text:#0F172A;--text2:#475569;--muted:#64748B;--accent:#2563EB;--accent-hover:#1D4ED8;--on-accent:#FFFFFF;--accent-text:#1D4ED8;--accent-soft:#DBEAFE;--ok:#15803D;--ok-soft:#DCFCE7;--warn:#B45309;--warn-soft:#FEF3C7;--err:#B91C1C;--err-soft:#FEE2E2;--neu:#475569;--neu-soft:#F1F5F9;--focus:#1D4ED8;--overlay:rgba(15,23,42,.5);--shadow:0 12px 32px rgba(15,23,42,.16)}
+:root{--ctl:40px;--cell:14px;--gap:16px;--pad:20px}
+[data-density="compact"]{--ctl:34px;--cell:8px;--gap:12px;--pad:14px}
+@media (pointer:coarse){[data-density]{--ctl:44px}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{white-space:nowrap}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+a{color:var(--accent-text)}
+a:hover{color:var(--text)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5">
+  <div role="region" aria-label="Controles do protótipo" style="background:var(--raised);border-bottom:1px solid var(--border-strong);font-size:12px;color:var(--text2)">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:6px 16px">
+      <span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--warn)"><i class="ph ph-flask" aria-hidden="true"></i>Protótipo · dados demonstrativos fictícios</span>
+      <nav aria-label="Arquivos do protótipo" style="display:flex;flex-wrap:wrap;gap:4px">
+        <a href="EloServ.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Público + Clientes</a>
+        <a href="EloServ%20Empresas.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Empresas</a>
+        <a href="EloServ%20Admin.dc.html" aria-current="page" style="padding:3px 8px;border-radius:var(--r1);background:var(--accent-soft);color:var(--accent-text);text-decoration:none;font-weight:600">Admin</a>
+        <a href="EloServ%20Handoff.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Handoff</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:6px"><span>Largura</span><div role="radiogroup" aria-label="Simular largura" style="display:inline-flex;border:1px solid var(--border-strong);border-radius:var(--r1);overflow:hidden"><sc-for list="{{ frameOpts }}" as="o" hint-placeholder-count="4"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="border:0;padding:3px 8px;cursor:pointer;font-size:12px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div></div>
+      <button onClick="{{ resetDemo }}" style="border:1px solid var(--border-strong);border-radius:var(--r1);background:transparent;padding:2px 8px;font-size:12px;cursor:pointer">Restaurar dados</button>
+      <code style="margin-left:auto;font-size:12px;color:var(--muted)">{{ routeTxt }}</code>
+    </div>
+  </div>
+  <div style="max-width:{{ frameMax }};margin:0 auto;border-left:{{ frameBd }};border-right:{{ frameBd }}">
+    <div ref="{{ frameRef }}" style="display:flex;min-height:100vh;background:var(--bg)">
+      <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}">
+        <aside aria-label="Navegação da administração" style="width:252px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column">
+          <a href="EloServ.dc.html#/" style="display:flex;align-items:center;gap:10px;padding:18px 20px;text-decoration:none;color:var(--text);font-weight:700"><span style="width:28px;height:28px;border-radius:var(--r2);background:var(--text);display:grid;place-items:center;color:var(--bg)"><i class="ph ph-shield-check" aria-hidden="true"></i></span>EloServ Admin</a>
+          <div style="margin:0 12px 8px;padding:8px 10px;border-radius:var(--r2);background:var(--raised);font-size:12px;color:var(--text2)"><div style="font-weight:600;color:var(--text)">Central de administração</div>Paulo Lemos · Operações</div>
+          <nav style="display:flex;flex-direction:column;gap:2px;padding:4px 12px 16px">
+            <sc-for list="{{ aNav }}" as="n" hint-placeholder-count="10"><a href="{{ n.href }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:10px;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);text-decoration:none;font-size:14px;font-weight:500;color:{{ n.fg }};background:{{ n.bg }}" style-hover="background:var(--raised);color:var(--text)"><i class="{{ n.icon }}" aria-hidden="true" style="font-size:18px"></i><span style="flex:1">{{ n.l }}</span><sc-if value="{{ n.count }}"><span style="min-width:20px;padding:0 6px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums">{{ n.count }}</span></sc-if></a></sc-for>
+          </nav>
+        </aside>
+      </sc-if>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <header style="position:sticky;top:0;z-index:15;background:var(--bg);border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:10px;min-height:60px;padding:0 var(--pad)">
+            <sc-if value="{{ notDesk }}"><button aria-label="Abrir menu" aria-expanded="{{ menu }}" onClick="{{ toggleMenu }}" style="display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border:1px solid var(--border-strong);border-radius:var(--r2);background:var(--surface);cursor:pointer;font-size:20px"><i class="ph ph-list" aria-hidden="true"></i></button></sc-if>
+            <nav aria-label="Trilha" style="display:flex;align-items:center;gap:6px;font-size:14px;min-width:0"><a href="#/admin" style="color:var(--text2);text-decoration:none;white-space:nowrap">Admin</a><sc-if value="{{ crumb }}"><i class="ph ph-caret-right" aria-hidden="true" style="color:var(--muted)"></i><span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ crumb }}</span></sc-if></nav>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+              <button aria-label="Tema e densidade" title="Tema e densidade" onClick="{{ openPrefs }}" style="display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border:0;border-radius:var(--r2);background:transparent;color:var(--text2);cursor:pointer;font-size:20px" style-hover="background:var(--raised)"><i class="ph ph-circle-half" aria-hidden="true"></i></button>
+              <span style="display:inline-flex;align-items:center;gap:8px;padding:0 6px"><span style="width:30px;height:30px;border-radius:999px;background:var(--raised);display:grid;place-items:center;font-size:12px;font-weight:700">PL</span><sc-if value="{{ notMob }}"><span style="font-size:14px;font-weight:500">Paulo Lemos</span></sc-if></span>
+            </div>
+          </div>
+        </header>
+        <main style="flex:1;padding:var(--pad);max-width:1320px;width:100%">
+          <sc-if value="{{ R.home }}" hint-placeholder-val="{{ true }}">
+            <section data-screen-label="Admin · Visão geral">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Visão geral</h1>
+              <p style="margin:4px 0 0;font-size:14px;color:var(--text2)">Situação operacional da plataforma. Valores derivados dos dados demonstrativos.</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:20px;align-items:start">
+                <section aria-labelledby="h-sit" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                  <h2 id="h-sit" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:15px">Empresas por situação</h2>
+                  <ul style="list-style:none;margin:0;padding:0"><sc-for list="{{ bySt }}" as="b" hint-placeholder-count="5"><li><a href="{{ b.href }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ b.b.fg }};background:{{ b.b.bg }}"><i class="{{ b.b.icon }}" aria-hidden="true"></i>{{ b.b.label }}</span><strong style="font-size:18px;font-variant-numeric:tabular-nums">{{ b.n }}</strong></a></li></sc-for></ul>
+                </section>
+                <div style="display:flex;flex-direction:column;gap:var(--gap)">
+                  <section aria-labelledby="h-pendh" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                    <h2 id="h-pendh" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:15px">Aguardando habilitação</h2>
+                    <sc-if value="{{ noPend }}"><p style="margin:0;padding:var(--pad);font-size:14px;color:var(--text2)">Nenhum cadastro aguardando análise.</p></sc-if>
+                    <sc-for list="{{ pendCos }}" as="c"><a href="{{ c.href }}" style="display:flex;justify-content:space-between;gap:12px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><span><strong style="display:block;font-size:14px">{{ c.name }}</strong><span style="font-size:13px;color:var(--text2)">{{ c.city }} · cadastro em {{ c.date }}</span></span><i class="ph ph-caret-right" aria-hidden="true" style="align-self:center;color:var(--muted)"></i></a></sc-for>
+                  </section>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden">
+                    <a href="#/admin/usuarios" style="padding:14px var(--pad);background:var(--surface);text-decoration:none;color:var(--text)"><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">{{ uAct }}</div><div style="font-size:13px;color:var(--text2)">Usuários ativos</div></a>
+                    <a href="#/admin/usuarios" style="padding:14px var(--pad);background:var(--surface);text-decoration:none;color:var(--text)"><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">{{ uSus }}</div><div style="font-size:13px;color:var(--text2)">Suspensos</div></a>
+                    <a href="#/admin/suporte" style="padding:14px var(--pad);background:var(--surface);text-decoration:none;color:var(--text)"><div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--warn)">{{ supOpen }}</div><div style="font-size:13px;color:var(--text2)">Suporte em aberto</div></a>
+                  </div>
+                </div>
+              </div>
+              <section aria-labelledby="h-rec" style="margin-top:var(--gap);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad);border-bottom:1px solid var(--border)"><h2 id="h-rec" style="margin:0;font-size:15px">Atividades administrativas recentes</h2><a href="#/admin/auditoria" style="font-size:13px;font-weight:600">Ver auditoria</a></div>
+                <ul style="list-style:none;margin:0;padding:0"><sc-for list="{{ recent }}" as="a" hint-placeholder-count="4"><li style="display:flex;flex-wrap:wrap;gap:4px 16px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border);font-size:14px"><span style="width:140px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ a.when }}</span><span style="flex:1 1 260px"><strong>{{ a.act }}</strong> · {{ a.ent }}<span style="display:block;font-size:13px;color:var(--text2)">{{ a.who }}</span></span></li></sc-for></ul>
+              </section>
+            </section>
+          </sc-if>
+          <sc-if value="{{ R.cos }}">
+            <section data-screen-label="Admin · Empresas">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Empresas</h1>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:16px">
+                <label style="position:relative;display:block"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar empresa</span><i class="ph ph-magnifying-glass" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)"></i><input type="search" value="{{ cq }}" onChange="{{ onCq }}" placeholder="Buscar por nome" style="width:100%;min-height:var(--ctl);padding:0 12px 0 36px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></label>
+                <label><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Situação</span><select data-v="{{ cst }}" value="{{ cst }}" onChange="{{ onCst }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ stOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+                <label><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Cidade</span><select data-v="{{ ccity }}" value="{{ ccity }}" onChange="{{ onCcity }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ cityOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              </div>
+              <p aria-live="polite" style="margin:12px 0 8px;font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">{{ coCount }}</p>
+              <sc-if value="{{ coNone }}"><div style="padding:32px;text-align:center;border:1px dashed var(--border-strong);border-radius:var(--r3)"><p style="margin:0 0 10px;color:var(--text2)">Nenhuma empresa com esses filtros.</p><button onClick="{{ clearCo }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Limpar filtros</button></div></sc-if>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:720px"><thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Empresa</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Cidade</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Cadastro</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Situação</th><th scope="col" style="text-align:right;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Ação</th></tr></thead>
+                  <tbody><sc-for list="{{ coRows }}" as="c" hint-placeholder-count="8"><tr style="border-bottom:1px solid var(--border)"><td style="padding:var(--cell) var(--pad);max-width:340px"><strong style="overflow-wrap:anywhere">{{ c.name }}</strong><div style="font-size:12px;color:var(--muted)">Responsável: {{ c.resp }}</div></td><td style="padding:var(--cell) 10px">{{ c.city }}</td><td style="padding:var(--cell) 10px;font-variant-numeric:tabular-nums">{{ c.date }}</td><td style="padding:var(--cell) 10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ c.b.fg }};background:{{ c.b.bg }}"><i class="{{ c.b.icon }}" aria-hidden="true"></i>{{ c.b.label }}</span></td><td style="padding:var(--cell) var(--pad);text-align:right"><a href="{{ c.href }}" style="font-weight:600;white-space:nowrap">{{ c.act }}</a></td></tr></sc-for></tbody>
+                </table>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.co }}">
+            <sc-if value="{{ cMissing }}"><p style="padding:40px 0;text-align:center">Empresa não encontrada. <a href="#/admin/empresas">Voltar</a></p></sc-if>
+            <sc-if value="{{ cOk }}">
+              <section data-screen-label="Admin · Detalhe da empresa">
+                <a href="#/admin/empresas" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;text-decoration:none"><i class="ph ph-arrow-left" aria-hidden="true"></i>Empresas</a>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;align-items:flex-start">
+                  <div style="min-width:0"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em;overflow-wrap:anywhere">{{ c.name }}</h1><div style="font-size:14px;color:var(--text2)">{{ c.city }} · cadastro em {{ c.date }} · empresa fictícia</div></div>
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;color:{{ c.b.fg }};background:{{ c.b.bg }}"><i class="{{ c.b.icon }}" aria-hidden="true"></i>{{ c.b.label }}</span>
+                </div>
+                <sc-if value="{{ c.hasWhy }}"><p style="margin:12px 0 0;padding:12px;border-radius:var(--r2);background:var(--err-soft);font-size:14px"><strong>Justificativa registrada:</strong> {{ c.why }}</p></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:var(--gap);align-items:start">
+                  <div style="display:flex;flex-direction:column;gap:var(--gap);min-width:0">
+                    <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Cadastro e responsáveis</h2><dl style="margin:0;padding:var(--pad);display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:10px 16px;font-size:14px"><dt style="color:var(--muted)">CNPJ</dt><dd style="margin:0;font-variant-numeric:tabular-nums">00.000.000/0000-00 (fictício)</dd><dt style="color:var(--muted)">Responsável</dt><dd style="margin:0">{{ c.resp }}</dd><dt style="color:var(--muted)">E-mail</dt><dd style="margin:0">{{ c.mail }} <span style="font-size:12px;color:var(--muted)">(parcialmente oculto)</span></dd><dt style="color:var(--muted)">Serviços publicados</dt><dd style="margin:0;font-variant-numeric:tabular-nums">{{ c.svcs }}</dd><dt style="color:var(--muted)">Atendimentos futuros</dt><dd style="margin:0;font-variant-numeric:tabular-nums">{{ c.fut }} <span style="font-size:12px;color:var(--muted)">(apenas contagem)</span></dd></dl></section>
+                    <sc-if value="{{ c.isPend }}">
+                      <section aria-labelledby="h-chk" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                        <div style="padding:14px var(--pad);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 id="h-chk" style="margin:0;font-size:16px">Análise cadastral</h2><span aria-live="polite" style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">{{ chkInfo }}</span></div>
+                        <div style="padding:var(--pad);display:flex;flex-direction:column;gap:4px"><sc-for list="{{ chkItems }}" as="i"><label style="display:flex;gap:10px;align-items:flex-start;min-height:40px;font-size:14px;cursor:pointer"><input type="checkbox" checked="{{ i.on }}" onChange="{{ i.toggle }}" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent)">{{ i.l }}</label></sc-for>
+                          <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">Habilitação é uma verificação cadastral; não representa certificação técnica.</p></div>
+                      </section>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:var(--gap);min-width:0">
+                    <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Ações administrativas</h2>
+                      <div style="padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+                        <sc-if value="{{ c.isPend }}"><button onClick="{{ askEnable }}" disabled="{{ chkNot }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-check-circle" aria-hidden="true"></i>Habilitar empresa</button><sc-if value="{{ chkNot }}"><p style="margin:0;font-size:13px;color:var(--text2)">Conclua todos os itens da análise para habilitar.</p></sc-if></sc-if>
+                        <sc-if value="{{ c.isAct }}"><a href="{{ c.pubHref }}" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600"><i class="ph ph-arrow-square-out" aria-hidden="true"></i>Ver perfil público</a><button onClick="{{ askSuspend }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--err);background:transparent;color:var(--err);font-size:14px;font-weight:600;cursor:pointer">Suspender empresa</button></sc-if>
+                        <sc-if value="{{ c.isSus }}"><button onClick="{{ askReact }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Reativar empresa</button></sc-if>
+                        <sc-if value="{{ c.canArc }}"><button onClick="{{ askArchive }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer">Arquivar empresa</button></sc-if>
+                        <sc-if value="{{ c.isArc }}"><p style="margin:0;font-size:14px;color:var(--text2)">Empresa arquivada. Histórico disponível apenas para consulta.</p></sc-if>
+                        <sc-if value="{{ c.isFill }}"><p style="margin:0;font-size:14px;color:var(--text2)">Cadastro ainda em preenchimento pelo responsável. Nenhuma ação de habilitação disponível.</p></sc-if>
+                        <p style="margin:0;font-size:12px;color:var(--muted)">Ações sensíveis exigem justificativa e geram registro de auditoria.</p>
+                      </div>
+                    </section>
+                    <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Histórico administrativo</h2><sc-if value="{{ cHasHist }}"><ul style="list-style:none;margin:0;padding:var(--pad);display:flex;flex-direction:column;gap:10px"><sc-for list="{{ cHist }}" as="h"><li style="font-size:14px"><span style="display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ h.when }} · {{ h.who }}</span><strong>{{ h.act }}</strong><span style="display:block;font-size:13px;color:var(--text2)">{{ h.why }}</span></li></sc-for></ul></sc-if><sc-if value="{{ cNoHist }}"><p style="margin:0;padding:var(--pad);font-size:14px;color:var(--text2)">Sem registros administrativos para esta empresa.</p></sc-if></section>
+                  </div>
+                </div>
+              </section>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ R.users }}">
+            <section data-screen-label="Admin · Usuários e acessos">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Usuários e acessos</h1><button onClick="{{ newInvite }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-user-plus" aria-hidden="true"></i>Convidar administrador</button></div>
+              <p style="margin:4px 0 0;font-size:14px;color:var(--text2)">E-mails parcialmente ocultos. Senhas nunca são exibidas. {{ princInfo }}.</p>
+              <label style="display:block;position:relative;max-width:360px;margin-top:16px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar usuário</span><i class="ph ph-magnifying-glass" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)"></i><input type="search" value="{{ uq }}" onChange="{{ onUq }}" placeholder="Buscar por nome, papel ou vínculo" style="width:100%;min-height:var(--ctl);padding:0 12px 0 36px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></label>
+              <ul style="list-style:none;margin:12px 0 0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                <sc-for list="{{ uRows }}" as="u" hint-placeholder-count="8"><li style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)">
+                  <span style="flex:1 1 220px;min-width:0"><strong style="font-size:14px">{{ u.n }}</strong><sc-if value="{{ u.isSelf }}"><span style="margin-left:6px;font-size:12px;color:var(--muted)">(você)</span></sc-if><span style="display:block;font-size:13px;color:var(--text2)">{{ u.mail }} · {{ u.scope }}</span><sc-if value="{{ u.also }}"><span style="display:block;font-size:12px;color:var(--muted)">{{ u.also }}</span></sc-if></span>
+                  <span style="flex:0 1 220px;font-size:13px">{{ u.role }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ u.b.fg }};background:{{ u.b.bg }}"><i class="{{ u.b.icon }}" aria-hidden="true"></i>{{ u.b.label }}</span>
+                  <span style="display:flex;gap:6px;flex-wrap:wrap">
+                    <button onClick="{{ u.editRole }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">Editar papel</button>
+                    <sc-if value="{{ u.canSus }}"><button onClick="{{ u.sus }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--err);font-size:13px;font-weight:600;cursor:pointer">Suspender</button></sc-if>
+                    <sc-if value="{{ u.canReact }}"><button onClick="{{ u.react }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">Reativar</button></sc-if>
+                    <sc-if value="{{ u.isInv }}"><button onClick="{{ u.revInv }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--err);font-size:13px;font-weight:600;cursor:pointer">Revogar convite</button></sc-if>
+                  </span>
+                </li></sc-for>
+              </ul>
+              <p style="margin:12px 0 0;font-size:12px;color:var(--muted)">Não há exclusão destrutiva de histórico. Revogação e suspensão preservam registros.</p>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.publicados }}">
+            <section data-screen-label="Admin · Conteúdo publicado">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Serviços e produtos publicados</h1><p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Moderação de conteúdo público. Ajustes são solicitados à empresa com justificativa.</p>
+              <ul style="list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ pubRows }}" as="p"><li style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span style="flex:1 1 260px;min-width:0"><strong style="font-size:14px">{{ p.n }}</strong><span style="display:block;font-size:13px;color:var(--text2);overflow-wrap:anywhere">{{ p.co }}</span></span><sc-if value="{{ p.flag }}"><span style="font-size:13px;color:var(--warn);display:flex;gap:6px;align-items:center"><i class="ph ph-warning" aria-hidden="true"></i>{{ p.why }}</span><button onClick="{{ p.ask }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">Solicitar ajuste</button></sc-if><sc-if value="{{ p.ok }}"><span style="font-size:13px;color:var(--ok);display:flex;gap:6px;align-items:center"><i class="ph ph-check-circle" aria-hidden="true"></i>Sem pendências</span></sc-if></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.categorias }}">
+            <section data-screen-label="Admin · Categorias" style="max-width:720px">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Categorias</h1>
+              <ul style="list-style:none;margin:16px 0 0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ catRows }}" as="c"><li style="display:flex;justify-content:space-between;gap:12px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border);font-size:14px"><strong>{{ c.n }}</strong><span style="color:var(--text2);font-variant-numeric:tabular-nums">{{ c.c }}</span></li></sc-for></ul>
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><label style="flex:1 1 240px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nova categoria</span><input value="{{ newCat }}" onChange="{{ onNewCat }}" placeholder="Nome da nova categoria" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></label><button onClick="{{ addCat }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Adicionar</button></div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.agendamentos }}">
+            <section data-screen-label="Admin · Agendamentos">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Agendamentos</h1>
+              <p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Visão agregada, sem dados de clientes. Detalhes operacionais exigem justificativa e ficam registrados.</p>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:620px"><thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Empresa</th><th scope="col" style="text-align:right;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Confirmados (7 dias)</th><th scope="col" style="text-align:right;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Reservas temporárias</th><th scope="col" style="text-align:right;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Conflitos abertos</th><th scope="col" style="padding:10px var(--pad);border-bottom:1px solid var(--border)"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Ação</span></th></tr></thead><tbody><sc-for list="{{ agRows }}" as="a"><tr style="border-bottom:1px solid var(--border)"><td style="padding:var(--cell) var(--pad);max-width:320px;overflow-wrap:anywhere">{{ a.co }}</td><td style="padding:var(--cell) 10px;text-align:right;font-variant-numeric:tabular-nums">{{ a.a }}</td><td style="padding:var(--cell) 10px;text-align:right;font-variant-numeric:tabular-nums">{{ a.t }}</td><td style="padding:var(--cell) 10px;text-align:right;font-variant-numeric:tabular-nums">{{ a.cf }}</td><td style="padding:var(--cell) var(--pad);text-align:right"><button onClick="{{ a.ask }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">Solicitar detalhe</button></td></tr></sc-for></tbody></table></div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.kb }}">
+            <section data-screen-label="Admin · Base de conhecimento">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Base de conhecimento</h1><button onClick="{{ newArt }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-plus" aria-hidden="true"></i>Novo artigo</button></div>
+              <ul style="list-style:none;margin:16px 0 0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ kbRows }}" as="a" hint-placeholder-count="6"><li style="border-bottom:1px solid var(--border)"><a href="{{ a.href }}" style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><span style="flex:1 1 260px;min-width:0"><strong style="display:block;font-size:14px">{{ a.title }}</strong><span style="font-size:13px;color:var(--text2)">{{ a.cat }} · Para: {{ a.aud }}</span></span><span style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ a.upd }}</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ a.b.fg }};background:{{ a.b.bg }}"><i class="{{ a.b.icon }}" aria-hidden="true"></i>{{ a.b.label }}</span></a></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.kbEd }}">
+            <sc-if value="{{ kMissing }}"><p style="padding:40px 0;text-align:center">Artigo não encontrado. <a href="#/admin/ajuda">Voltar</a></p></sc-if>
+            <sc-if value="{{ kOk }}">
+              <section data-screen-label="Admin · Editor de artigo" style="max-width:900px">
+                <a href="#/admin/ajuda" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;text-decoration:none"><i class="ph ph-arrow-left" aria-hidden="true"></i>Base de conhecimento</a>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;align-items:center"><div style="display:flex;gap:8px;align-items:center"><h1 style="margin:0;font-size:22px">Editar artigo</h1><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ k.b.fg }};background:{{ k.b.bg }}"><i class="{{ k.b.icon }}" aria-hidden="true"></i>{{ k.b.label }}</span><sc-if value="{{ kDirty }}"><span style="font-size:12px;color:var(--warn)">Alterações não salvas</span></sc-if></div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ togglePrev }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">{{ prevLbl }}</button><button onClick="{{ saveDraft }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Salvar rascunho</button><button onClick="{{ publish }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Publicar</button><sc-if value="{{ k.notArc }}"><button onClick="{{ archive }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--text2);font-size:14px;cursor:pointer">Arquivar</button></sc-if></div></div>
+                <sc-if value="{{ kHasErr }}"><div role="alert" style="margin-top:12px;padding:14px;border-radius:var(--r2);border:1px solid var(--err);background:var(--err-soft);font-size:14px"><strong>Antes de publicar:</strong><ul style="margin:6px 0 0;padding-left:20px"><sc-for list="{{ kErrs }}" as="e"><li>{{ e }}</li></sc-for></ul></div></sc-if>
+                <sc-if value="{{ kEdit }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top:16px;padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);display:flex;flex-direction:column;gap:14px">
+                    <div><label for="kt" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Título</label><input id="kt" value="{{ k.title }}" onChange="{{ onK.title }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></div>
+                    <div><label for="ks" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Resumo</label><input id="ks" value="{{ k.summary }}" onChange="{{ onK.summary }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Categoria<select data-v="{{ k.cat }}" value="{{ k.cat }}" onChange="{{ onK.cat }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ kCatOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Público<select data-v="{{ k.aud }}" value="{{ k.aud }}" onChange="{{ onK.aud }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ kAudOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label></div>
+                    <div><label for="kp" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Passos <span style="font-weight:400;color:var(--muted)">(um por linha)</span></label><textarea id="kp" rows="6" value="{{ k.steps }}" onChange="{{ onK.steps }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                    <div><label for="kn" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Observações <span style="font-weight:400;color:var(--muted)">(uma por linha)</span></label><textarea id="kn" rows="3" value="{{ k.notes }}" onChange="{{ onK.notes }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ kPrev }}">
+                  <article aria-label="Pré-visualização" style="margin-top:16px;padding:28px;background:var(--surface);border:1px dashed var(--border-strong);border-radius:var(--r3)">
+                    <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:var(--warn)">Pré-visualização — não publicada</p>
+                    <h2 style="margin:0;font-size:26px">{{ k.title }}</h2><p style="margin:8px 0 0;color:var(--text2)">{{ k.summary }}</p><p style="margin:8px 0 0;font-size:12px;color:var(--muted)">{{ k.cat }} · Para: {{ k.aud }}</p>
+                    <ol style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ k.stepList }}" as="st"><li style="display:flex;gap:10px;font-size:14px"><span aria-hidden="true" style="flex-shrink:0;width:24px;height:24px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-size:12px;font-weight:700">{{ st.n }}</span>{{ st.t }}</li></sc-for></ol>
+                    <ul style="margin:16px 0 0;padding-left:20px;font-size:14px;color:var(--text2)"><sc-for list="{{ k.noteList }}" as="n"><li>{{ n }}</li></sc-for></ul>
+                  </article>
+                </sc-if>
+              </section>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ R.suporte }}">
+            <section data-screen-label="Admin · Suporte">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Solicitações de suporte</h1><p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Atendimento humano em horário comercial. Sem chatbot.</p>
+              <ul style="list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ supRows }}" as="t"><li style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span style="width:70px;font-size:13px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums">{{ t.id }}</span><span style="flex:1 1 240px"><strong style="font-size:14px">{{ t.t }}</strong><span style="display:block;font-size:13px;color:var(--text2)">{{ t.who }} · {{ t.d }}</span></span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ t.b.fg }};background:{{ t.b.bg }}"><i class="{{ t.b.icon }}" aria-hidden="true"></i>{{ t.b.label }}</span></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.auditoria }}">
+            <section data-screen-label="Admin · Auditoria">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px"><div><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Auditoria</h1><p style="margin:4px 0 0;font-size:14px;color:var(--text2)">Registros sem senhas, tokens ou conteúdo pessoal desnecessário.</p></div><label style="min-width:220px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tipo de alteração</span><select data-v="{{ af }}" value="{{ af }}" onChange="{{ onAf }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ afOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label></div>
+              <sc-if value="{{ audNone }}"><p style="margin:16px 0 0;color:var(--text2)">Nenhum registro deste tipo.</p></sc-if>
+              <div style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:760px"><thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Quando</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Quem</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Entidade</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Alteração</th><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Justificativa</th></tr></thead><tbody><sc-for list="{{ audRows }}" as="a" hint-placeholder-count="5"><tr style="border-bottom:1px solid var(--border);vertical-align:top"><td style="padding:var(--cell) var(--pad);white-space:nowrap;font-variant-numeric:tabular-nums">{{ a.when }}</td><td style="padding:var(--cell) 10px">{{ a.who }}</td><td style="padding:var(--cell) 10px">{{ a.ent }}</td><td style="padding:var(--cell) 10px;font-weight:600">{{ a.act }}</td><td style="padding:var(--cell) var(--pad);color:var(--text2);max-width:280px">{{ a.why }}</td></tr></sc-for></tbody></table></div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.configuracoes }}">
+            <section data-screen-label="Admin · Configurações" style="max-width:820px">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Configurações da plataforma</h1>
+              <dl style="margin:16px 0 0;padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);display:grid;grid-template-columns:minmax(200px,auto) 1fr;gap:12px 20px;font-size:14px">
+                <dt style="color:var(--muted)">Região inicial</dt><dd style="margin:0">Mato Grosso · expansão Centro-Oeste prevista</dd>
+                <dt style="color:var(--muted)">Validade padrão da reserva temporária</dt><dd style="margin:0">24 horas · ajustável por empresa (hipótese proposta)</dd>
+                <dt style="color:var(--muted)">Sessão inativa</dt><dd style="margin:0">Expira após 30 minutos (hipótese proposta)</dd>
+                <dt style="color:var(--muted)">Cobrança da assinatura</dt><dd style="margin:0">Fora do escopo inicial. Planos e preços não definidos.</dd>
+              </dl>
+            </section>
+          </sc-if>
+          <div data-slot="a1"></div>
+        </main>
+      </div>
+    </div>
+    <sc-if value="{{ menuOpen }}">
+      <div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:40;background:var(--overlay)"></div>
+      <nav aria-label="Navegação da administração" style="position:fixed;top:0;bottom:0;left:{{ fl }}px;z-index:41;width:min(300px,85vw);background:var(--surface);border-right:1px solid var(--border-strong);box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:2px;overflow:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px 12px"><strong>Central de administração</strong><button aria-label="Fechar menu" onClick="{{ closeMenu }}" style="width:44px;height:44px;border:0;background:transparent;cursor:pointer;font-size:20px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+        <sc-for list="{{ aNav }}" as="n"><a href="{{ n.href }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r2);text-decoration:none;font-size:15px;color:{{ n.fg }};background:{{ n.bg }}"><i class="{{ n.icon }}" aria-hidden="true" style="font-size:18px"></i>{{ n.l }}</a></sc-for>
+      </nav>
+    </sc-if>
+  </div>
+  <sc-if value="{{ modalOpen }}">
+    <div style="position:fixed;inset:0;z-index:50;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:12px">
+      <div ref="{{ modalRef }}" role="dialog" aria-modal="true" aria-labelledby="m-title" style="width:{{ mw }};max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r3);box-shadow:var(--shadow)">
+        <sc-if value="{{ m_enable }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Habilitar {{ mCo.name }}?</h2>
+            <ul style="margin:10px 0 0;padding-left:20px;font-size:14px;color:var(--text2);display:flex;flex-direction:column;gap:4px"><li>O perfil público passa a aparecer no catálogo.</li><li>A empresa pode receber solicitações.</li><li>Habilitação não representa certificação técnica.</li></ul>
+            <label for="mj" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="mj" rows="3" value="{{ mtext }}" onChange="{{ onMtext }}" aria-describedby="mj-err" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p id="mj-err" role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doEnable }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Habilitar e registrar</button></div>
+        </sc-if>
+        <sc-if value="{{ m_suspendCo }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Suspender {{ mCo.name }}?</h2>
+            <div style="margin-top:12px;padding:12px;border-radius:var(--r2);background:var(--warn-soft);font-size:14px"><strong>Impacto</strong><ul style="margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px"><li>Perfil público deixa de aparecer no catálogo.</li><li>Novas solicitações ficam bloqueadas.</li><li>{{ mCo.fut }} atendimentos confirmados permanecem e precisam ser tratados pela empresa com seus clientes. Nada é cancelado automaticamente.</li><li>Histórico preservado.</li></ul></div>
+            <label for="ms" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="ms" rows="3" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doSuspendCo }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Suspender</button></div>
+        </sc-if>
+        <sc-if value="{{ m_reactCo }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Reativar {{ mCo.name }}?</h2><p style="margin:8px 0 0;font-size:14px;color:var(--text2)">O perfil volta ao catálogo e a empresa volta a receber solicitações.</p><label for="mr" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="mr" rows="2" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doReactCo }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Reativar</button></div>
+        </sc-if>
+        <sc-if value="{{ m_archiveCo }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Arquivar {{ mCo.name }}?</h2><p style="margin:8px 0 0;font-size:14px;color:var(--text2)">A empresa deixa de operar na plataforma. Dados e histórico ficam preservados para consulta. Não há exclusão.</p><label for="ma" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="ma" rows="2" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doArchiveCo }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Arquivar</button></div>
+        </sc-if>
+        <sc-if value="{{ m_suspendUser }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Suspender acesso de {{ mU.n }}?</h2><p style="margin:8px 0 0;font-size:14px;color:var(--text2)">O usuário deixa de acessar a plataforma até ser reativado. Vínculos e histórico são preservados.</p><label for="mu" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="mu" rows="2" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doSuspendUser }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Suspender</button></div>
+        </sc-if>
+        <sc-if value="{{ m_lastAdmin }}">
+          <div role="alert" style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px;display:flex;gap:8px;align-items:center"><i class="ph ph-shield-warning" aria-hidden="true" style="color:var(--err)"></i>Ação bloqueada</h2><p style="margin:8px 0 0;font-size:14px">{{ mU.n }} é a única administradora principal habilitada. Para evitar perda de controle da plataforma, habilite outra pessoa com esse nível antes de suspendê-la.</p></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 20px 20px"><button data-autofocus="true" onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Entendi</button></div>
+        </sc-if>
+        <sc-if value="{{ m_selfRole }}">
+          <div role="alert" style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px;display:flex;gap:8px;align-items:center"><i class="ph ph-lock-key" aria-hidden="true" style="color:var(--err)"></i>Você não pode alterar o próprio papel</h2><p style="margin:8px 0 0;font-size:14px">Autoelevação de privilégio não é permitida. Peça a outra pessoa com nível adequado para revisar seu acesso.</p></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 20px 20px"><button data-autofocus="true" onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Entendi</button></div>
+        </sc-if>
+        <sc-if value="{{ m_role }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Editar papel de {{ mU.n }}</h2>
+            <sc-if value="{{ uIsAdmin }}"><p style="margin:8px 0 12px;font-size:14px;color:var(--text2)">Seu nível (Operações) permite conceder apenas Suporte ou Operações. Nível Principal exige outra administradora principal.</p><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Papel<select data-v="{{ roleSel }}" value="{{ roleSel }}" onChange="{{ onRole }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ roleOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              <label for="mro" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="mro" rows="2" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></sc-if>
+            <sc-if value="{{ uNotAdmin }}"><p style="margin:8px 0 0;font-size:14px;color:var(--text2)">Papéis dentro de empresas (gestão e técnicos) são administrados pela própria empresa. A administração da plataforma pode apenas suspender ou reativar o acesso, com justificativa.</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Fechar</button><sc-if value="{{ uIsAdmin }}"><button onClick="{{ doRole }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Salvar papel</button></sc-if></div>
+        </sc-if>
+        <sc-if value="{{ m_invite }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Convidar administrador</h2><label for="mi" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">E-mail</label><input id="mi" type="email" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><p style="margin:10px 0 0;font-size:13px;color:var(--text2)">Papel inicial: Suporte. O convite expira e pode ser revogado enquanto pendente.</p></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doInvite }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Enviar convite</button></div>
+        </sc-if>
+        <sc-if value="{{ m_accessReq }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Solicitar acesso a detalhes operacionais</h2><p style="margin:8px 0 0;font-size:14px;color:var(--text2)">Dados de clientes e ordens não são exibidos por padrão. O acesso é temporário, limitado ao motivo e registrado na auditoria.</p><label for="mq" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Motivo <span style="color:var(--err)">*</span></label><textarea id="mq" rows="3" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doAccess }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Registrar pedido</button></div>
+        </sc-if>
+        <sc-if value="{{ m_prefs }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0 0 12px;font-size:18px">Tema e densidade</h2>
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Tema</div><div role="radiogroup" aria-label="Tema" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ themeOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:14px;font-weight:600;cursor:pointer"><i class="{{ o.icon }}" aria-hidden="true"></i>{{ o.l }}</button></sc-for></div>
+            <div style="font-size:13px;font-weight:600;margin:16px 0 6px">Densidade</div><div role="radiogroup" aria-label="Densidade" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ densOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:14px;font-weight:600;cursor:pointer"><i class="{{ o.icon }}" aria-hidden="true"></i>{{ o.l }}</button></sc-for></div></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Fechar</button></div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ toast }}">
+    <div role="status" aria-live="polite" style="position:fixed;z-index:70;bottom:20px;left:50%;transform:translateX(-50%);max-width:min(480px,calc(100% - 24px));display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r2);background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--shadow);font-size:14px"><i class="{{ toast.icon }}" aria-hidden="true" style="font-size:18px;color:{{ toast.fg }}"></i><span style="flex:1">{{ toast.msg }}</span><button aria-label="Fechar aviso" onClick="{{ closeToast }}" style="border:0;background:transparent;cursor:pointer;color:var(--text2);width:28px;height:28px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const rawGet = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
+const TONE = { a: ['var(--accent-text)', 'var(--accent-soft)'], w: ['var(--warn)', 'var(--warn-soft)'], o: ['var(--ok)', 'var(--ok-soft)'], n: ['var(--neu)', 'var(--neu-soft)'], e: ['var(--err)', 'var(--err-soft)'] };
+const BADGES = { preenchimento: ['Cadastro em preenchimento', 'ph-pencil-simple', 'n'], aguardando: ['Aguardando habilitação', 'ph-hourglass', 'w'], ativa: ['Ativa', 'ph-check-circle', 'o'], suspensa: ['Suspensa', 'ph-pause-circle', 'e'], arquivada: ['Arquivada', 'ph-archive', 'n'], ativo: ['Ativo', 'ph-check-circle', 'o'], suspenso: ['Suspenso', 'ph-pause-circle', 'w'], convite: ['Convite pendente', 'ph-envelope-simple', 'w'], revogado: ['Revogado', 'ph-prohibit', 'n'], publicado: ['Publicado', 'ph-check-circle', 'o'], rascunho: ['Rascunho', 'ph-pencil-simple', 'n'], arquivado: ['Arquivado', 'ph-archive', 'n'], aberta: ['Aberta', 'ph-circle', 'w'], andamento: ['Em andamento', 'ph-clock', 'a'], resolvida: ['Resolvida', 'ph-check-circle', 'o'] };
+const badge = k => { const b = BADGES[k] || ['—', 'ph-minus', 'n']; const t = TONE[b[2]]; return { label: b[0], icon: 'ph ' + b[1], fg: t[0], bg: t[1] }; };
+const TOAST = { ok: ['ph ph-check-circle', 'var(--ok)'], info: ['ph ph-info', 'var(--accent-text)'], warn: ['ph ph-warning', 'var(--warn)'] };
+const COS0 = [
+  { id: 'friovale', name: 'FrioVale Climatização', city: 'Cuiabá', date: '02/09/2026', st: 'ativa', resp: 'Marina D.', mail: 'ma•••@exemplo.invalid', svcs: 4, fut: 9 },
+  { id: 'polar-norte', name: 'Polar Norte Refrigeração', city: 'Sinop', date: '10/09/2026', st: 'ativa', resp: 'Diego S.', mail: 'di•••@exemplo.invalid', svcs: 3, fut: 4 },
+  { id: 'brisa-serrana', name: 'Brisa Serrana Ar-Condicionado', city: 'Rondonópolis', date: '18/09/2026', st: 'ativa', resp: 'Clara B.', mail: 'cl•••@exemplo.invalid', svcs: 2, fut: 2 },
+  { id: 'termo-leste', name: 'Termo Leste Climatização e Refrigeração Residencial e Comercial', city: 'Barra do Garças', date: '25/09/2026', st: 'ativa', resp: 'Marcos A.', mail: 'mr•••@exemplo.invalid', svcs: 4, fut: 3 },
+  { id: 'gelo-fino', name: 'Gelo Fino Refrigeração', city: 'Tangará da Serra', date: '21/10/2026', st: 'aguardando', resp: 'Rogério N.', mail: 'ro•••@exemplo.invalid', svcs: 2, fut: 0 },
+  { id: 'clima-norte', name: 'Clima Norte Serviços', city: 'Sorriso', date: '23/10/2026', st: 'preenchimento', resp: 'Ivete C.', mail: 'iv•••@exemplo.invalid', svcs: 0, fut: 0 },
+  { id: 'pantanal', name: 'Refrigeração Pantanal', city: 'Cáceres', date: '05/08/2026', st: 'suspensa', resp: 'Otávio R.', mail: 'ot•••@exemplo.invalid', svcs: 3, fut: 1, why: 'Dados cadastrais divergentes; aguardando correção pelo responsável.' },
+  { id: 'ar-leve', name: 'Ar Leve Climatização', city: 'Primavera do Leste', date: '12/07/2026', st: 'arquivada', resp: 'Sem responsável ativo', mail: '—', svcs: 0, fut: 0 }
+];
+const USERS0 = [
+  { id: 'paulo', n: 'Paulo Lemos', mail: 'pa•••@exemplo.invalid', role: 'Administrador · Operações', scope: 'Plataforma', st: 'ativo', self: true },
+  { id: 'lucia', n: 'Lúcia Prado', mail: 'lu•••@exemplo.invalid', role: 'Administradora · Principal', scope: 'Plataforma', st: 'ativo', principal: true },
+  { id: 'suporte', n: 'Convite de suporte', mail: 'su•••@exemplo.invalid', role: 'Administrador · Suporte', scope: 'Plataforma', st: 'convite' },
+  { id: 'marina', n: 'Marina Duarte', mail: 'ma•••@exemplo.invalid', role: 'Gestora · FrioVale', scope: 'FrioVale Climatização', st: 'ativo', also: 'Também cliente (conta pessoal)' },
+  { id: 'carlos', n: 'Carlos Mendes', mail: 'ca•••@exemplo.invalid', role: 'Técnico · FrioVale', scope: 'FrioVale Climatização', st: 'ativo' },
+  { id: 'rafael', n: 'Rafael Teixeira', mail: 'ra•••@exemplo.invalid', role: 'Técnico · FrioVale', scope: 'FrioVale Climatização', st: 'ativo' },
+  { id: 'rogerio', n: 'Rogério N.', mail: 'ro•••@exemplo.invalid', role: 'Gestor · Gelo Fino', scope: 'Gelo Fino Refrigeração', st: 'ativo' },
+  { id: 'otavio', n: 'Otávio R.', mail: 'ot•••@exemplo.invalid', role: 'Gestor · Refrigeração Pantanal', scope: 'Refrigeração Pantanal', st: 'suspenso' },
+  { id: 'ana', n: 'Ana Ribeiro', mail: 'an•••@exemplo.invalid', role: 'Cliente', scope: 'Conta pessoal', st: 'ativo' }
+];
+const AUD0 = [
+  { who: 'Lúcia Prado (admin principal)', when: '20/10/2026 · 16:12', ent: 'Empresa Refrigeração Pantanal', act: 'Empresa suspensa', why: 'Dados cadastrais divergentes; aguardando correção pelo responsável.' },
+  { who: 'Paulo Lemos (admin operações)', when: '18/10/2026 · 10:40', ent: 'Artigo “Como bloquear um período na agenda”', act: 'Artigo publicado', why: '' },
+  { who: 'Paulo Lemos (admin operações)', when: '25/09/2026 · 09:05', ent: 'Empresa Termo Leste', act: 'Empresa habilitada', why: 'Análise cadastral concluída.' },
+  { who: 'Lúcia Prado (admin principal)', when: '12/09/2026 · 14:20', ent: 'Usuário Otávio R.', act: 'Acesso suspenso', why: 'Vinculado à empresa suspensa.' }
+];
+
+class Component extends DCLogic {
+  frameRef = React.createRef();
+  modalRef = React.createRef();
+  state = { route: '/admin', w: 1200, fl: 0, frame: 'auto', theme: rawGet('eloserv.theme', 'dark'), density: rawGet('eloserv.density', 'comfort'), menu: false, modal: null, toast: null, ready: !!window.ELO,
+    cos: lsGet('eloserv.adm.cos', null) || COS0, users: lsGet('eloserv.adm.users', null) || USERS0, aud: lsGet('eloserv.adm.aud', null) || AUD0 };
+  componentDidMount() {
+    this.applyTheme(this.state.theme, this.state.density);
+    this.hashH = () => { const r = (location.hash.slice(1) || '/admin').split('?')[0]; this.setState({ route: r.startsWith('/admin') ? r : '/admin', menu: false }); window.scrollTo(0, 0); };
+    window.addEventListener('hashchange', this.hashH); this.hashH();
+    const measure = () => { const el = this.frameRef.current; if (!el) return; const r = el.getBoundingClientRect(); const w = Math.round(r.width), fl = Math.round(r.left); if (w !== this.state.w || fl !== this.state.fl) this.setState({ w, fl }); };
+    this.ro = new ResizeObserver(measure); if (this.frameRef.current) this.ro.observe(this.frameRef.current); window.addEventListener('resize', measure); this.measure = measure; measure();
+    this.keyH = e => { if (e.key !== 'Escape') return; if (this.state.modal) this.closeModal(); else this.setState({ menu: false }); };
+    document.addEventListener('keydown', this.keyH);
+    if (!window.ELO) this.poll = setInterval(() => { if (window.ELO) { clearInterval(this.poll); this.setState({ ready: true }); } }, 50);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hashH); document.removeEventListener('keydown', this.keyH); window.removeEventListener('resize', this.measure); this.ro && this.ro.disconnect(); clearInterval(this.poll); }
+  componentDidUpdate() {
+    const s = this.state, ps = this._prev || {};
+    this._prev = Object.assign({}, s);
+    clearTimeout(this.selT); this.selT = setTimeout(() => document.querySelectorAll('select[data-v]').forEach(el => { if (el.value !== el.dataset.v) el.value = el.dataset.v; }), 0);
+    if (s.modal && s.modal !== ps.modal) setTimeout(() => { const m = this.modalRef.current; const el = m && m.querySelector('[data-autofocus],textarea,input,select,button'); el && el.focus(); }, 40);
+    if (!s.modal && ps.modal && this.lastFocus && this.lastFocus.focus) this.lastFocus.focus();
+    if (s.frame !== ps.frame) setTimeout(this.measure, 30);
+    if (s.cos !== ps.cos) lsSet('eloserv.adm.cos', s.cos);
+    if (s.users !== ps.users) lsSet('eloserv.adm.users', s.users);
+    if (s.aud !== ps.aud) lsSet('eloserv.adm.aud', s.aud);
+  }
+  applyTheme(t, d) { const r = t === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t; document.documentElement.setAttribute('data-theme', r); document.documentElement.setAttribute('data-density', d); try { localStorage.setItem('eloserv.theme', t); localStorage.setItem('eloserv.density', d); } catch (e) {} }
+  go = p => { location.hash = p; };
+  openModal = (m, extra) => { this.lastFocus = document.activeElement; this.setState(Object.assign({ modal: m, mErr: '', mtext: '' }, extra || {})); };
+  closeModal = () => this.setState({ modal: null });
+  toast = (msg, kind) => { clearTimeout(this.tt); const k = TOAST[kind || 'ok']; this.setState({ toast: { msg, icon: k[0], fg: k[1] } }); this.tt = setTimeout(() => this.setState({ toast: null }), 5000); };
+  now() { return '24/10/2026 · ' + new Date().toTimeString().slice(0, 5); }
+  audit(ent, act, why) { this.setState(s => ({ aud: [{ who: 'Paulo Lemos (admin operações)', when: this.now(), ent, act, why: why || '' }].concat(s.aud) })); }
+  segOpts(list, cur, pick) { return list.map(([v, l, icon]) => ({ v, l, icon: 'ph ' + (icon || ''), on: cur === v, pick: () => pick(v), bg: cur === v ? 'var(--accent-soft)' : 'transparent', fg: cur === v ? 'var(--accent-text)' : 'var(--text2)', bd: cur === v ? 'var(--accent)' : 'var(--border-strong)' })); }
+  allAud() { const ext = lsGet('eloserv.demo.audit', []); return ext.concat(this.state.aud); }
+  setCo(id, patch) { this.setState(s => ({ cos: s.cos.map(c => c.id === id ? Object.assign({}, c, patch) : c) })); }
+  vmCos(base, seg, R) {
+    R.cos = seg[1] === 'empresas' && seg.length === 2; R.co = seg[1] === 'empresas' && seg.length === 3;
+    if (!R.cos && !R.co) return {};
+    const s = this.state, q = (s.cq || '').toLowerCase(), fst = s.cst || '', fcity = s.ccity || '';
+    const list = s.cos.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!fst || c.st === fst) && (!fcity || c.city === fcity));
+    const out = {
+      cq: s.cq || '', onCq: e => this.setState({ cq: e.target.value }), cst: fst, onCst: e => this.setState({ cst: e.target.value }), ccity: fcity, onCcity: e => this.setState({ ccity: e.target.value }),
+      stOpts: [['', 'Todas as situações'], ['preenchimento', 'Em preenchimento'], ['aguardando', 'Aguardando habilitação'], ['ativa', 'Ativa'], ['suspensa', 'Suspensa'], ['arquivada', 'Arquivada']].map(([v, l]) => ({ v, l })),
+      cityOpts: [{ v: '', l: 'Todas as cidades' }].concat([...new Set(s.cos.map(c => c.city))].sort().map(c => ({ v: c, l: c }))),
+      coRows: list.map(c => Object.assign({}, c, { b: badge(c.st), href: '#/admin/empresas/' + c.id, act: c.st === 'aguardando' ? 'Analisar cadastro' : 'Ver detalhes' })), coNone: list.length === 0, coCount: list.length + ' de ' + s.cos.length + ' empresas', clearCo: () => this.setState({ cq: '', cst: '', ccity: '' })
+    };
+    if (R.co) {
+      const c = s.cos.find(x => x.id === seg[2]);
+      out.cMissing = !c; out.cOk = !!c;
+      if (c) {
+        const chk = s.chk && s.chk.id === c.id ? s.chk : { id: c.id, v: {} };
+        const items = [['cnpj', 'CNPJ informado e consistente com a razão social'], ['resp', 'Responsável confirmou e-mail e telefone'], ['svc', 'Ao menos um serviço com duração e forma de preço'], ['pol', 'Políticas de atendimento e cancelamento publicadas'], ['pub', 'Conteúdo público sem promessas ou selos não comprovados']];
+        const allOk = items.every(([k]) => chk.v[k]);
+        Object.assign(out, {
+          c: Object.assign({}, c, { b: badge(c.st), isPend: c.st === 'aguardando', isAct: c.st === 'ativa', isSus: c.st === 'suspensa', isArc: c.st === 'arquivada', isFill: c.st === 'preenchimento', canArc: c.st === 'suspensa' || c.st === 'preenchimento', pubHref: 'EloServ.dc.html#/fornecedores/' + c.id, hasWhy: !!c.why }),
+          chkItems: items.map(([k, l]) => ({ k, l, on: !!chk.v[k], toggle: e => this.setState({ chk: { id: c.id, v: Object.assign({}, chk.v, { [k]: e.target.checked }) } }) })), chkAll: allOk, chkNot: !allOk, chkInfo: items.filter(([k]) => chk.v[k]).length + ' de ' + items.length + ' verificados',
+          cHist: this.allAud().filter(a => a.ent.includes(c.name.split(' ')[0])).slice(0, 6), cHasHist: this.allAud().some(a => a.ent.includes(c.name.split(' ')[0])), cNoHist: !this.allAud().some(a => a.ent.includes(c.name.split(' ')[0])),
+          askEnable: () => this.openModal('enable', { mid: c.id }), askSuspend: () => this.openModal('suspendCo', { mid: c.id }), askReact: () => this.openModal('reactCo', { mid: c.id }), askArchive: () => this.openModal('archiveCo', { mid: c.id })
+        });
+      }
+    }
+    return out;
+  }
+  vmUsers(base, seg, R) {
+    R.users = seg[1] === 'usuarios';
+    if (!R.users) return {};
+    const s = this.state, q = (s.uq || '').toLowerCase();
+    const princ = s.users.filter(u => u.principal && u.st === 'ativo').length;
+    const rows = s.users.filter(u => !q || (u.n + u.role + u.scope).toLowerCase().includes(q)).map(u => Object.assign({}, u, { b: badge(u.st), isSelf: !!u.self, notSelf: !u.self, canSus: !u.self && u.st === 'ativo', canReact: !u.self && u.st === 'suspenso', isInv: u.st === 'convite', also: u.also || '',
+      sus: () => { if (u.principal && princ <= 1) { this.openModal('lastAdmin', { mid: u.id }); return; } this.openModal('suspendUser', { mid: u.id }); },
+      react: () => { this.setState({ users: s.users.map(x => x.id === u.id ? Object.assign({}, x, { st: 'ativo' }) : x) }); this.audit('Usuário ' + u.n, 'Acesso reativado'); this.toast('Acesso reativado.'); },
+      editRole: () => this.openModal(u.self ? 'selfRole' : 'role', { mid: u.id, roleSel: u.role }),
+      revInv: () => { this.setState({ users: s.users.filter(x => x.id !== u.id) }); this.audit('Convite ' + u.mail, 'Convite revogado'); this.toast('Convite revogado.', 'info'); } }));
+    return { uq: s.uq || '', onUq: e => this.setState({ uq: e.target.value }), uRows: rows, newInvite: () => this.openModal('invite'), princInfo: princ + (princ === 1 ? ' administradora principal habilitada' : ' administradores principais habilitados') };
+  }
+  vmRest(base, seg, R) {
+    const s = this.state, sec = seg[1];
+    ['publicados', 'categorias', 'agendamentos', 'suporte', 'auditoria', 'configuracoes'].forEach(k => R[k] = sec === k);
+    R.kb = sec === 'ajuda' && seg.length === 2; R.kbEd = sec === 'ajuda' && seg.length === 3;
+    const out = {};
+    if (R.publicados) out.pubRows = [['Instalação de split', 'FrioVale Climatização', 'ativa', ''], ['Manutenção de balcão refrigerado', 'Polar Norte Refrigeração', 'ativa', ''], ['Higienização “com certificado de qualidade”', 'Brisa Serrana Ar-Condicionado', 'revisar', 'Menciona certificação não comprovada.'], ['Diagnóstico técnico', 'Termo Leste Climatização e Refrigeração Residencial e Comercial', 'ativa', '']].map(([n, co, st, why], i) => ({ n, co, why, flag: st === 'revisar' && !(s.modDone || []).includes(i), ok: st !== 'revisar' || (s.modDone || []).includes(i), ask: () => { this.setState({ modDone: (s.modDone || []).concat([i]) }); this.audit('Serviço “' + n + '” · ' + co, 'Ajuste de conteúdo solicitado', why); this.toast('Ajuste solicitado à empresa. O serviço segue visível até a correção.', 'info'); } }));
+    if (R.categorias) { const cats = s.cats || [['Climatização residencial', 4], ['Refrigeração comercial', 4]]; Object.assign(out, { catRows: cats.map(([n, c]) => ({ n, c: c + ' empresas' })), newCat: s.newCat || '', onNewCat: e => this.setState({ newCat: e.target.value }), addCat: () => { if (!(s.newCat || '').trim()) return; this.setState({ cats: cats.concat([[s.newCat.trim(), 0]]), newCat: '' }); this.audit('Categoria “' + s.newCat.trim() + '”', 'Categoria criada'); this.toast('Categoria criada. Ainda sem empresas vinculadas.'); } }); }
+    if (R.agendamentos) out.agRows = [['FrioVale Climatização', 9, 2, 1], ['Polar Norte Refrigeração', 4, 1, 0], ['Brisa Serrana Ar-Condicionado', 2, 0, 0], ['Termo Leste Climatização e Refrigeração Residencial e Comercial', 3, 1, 0], ['Refrigeração Pantanal (suspensa)', 1, 0, 0]].map(([co, a, t, cf]) => ({ co, a, t, cf, ask: () => this.openModal('accessReq', { mid: co }) }));
+    if (R.suporte) out.supRows = [['SUP-118', 'Não consigo convidar um técnico', 'Empresa · FrioVale', 'aberta', '24/10/2026'], ['SUP-117', 'Proposta expirou antes de eu ver', 'Cliente', 'aberta', '23/10/2026'], ['SUP-114', 'Como alterar o fuso da empresa', 'Empresa · Termo Leste', 'resolvida', '20/10/2026']].map(([id, t, who, st, d]) => ({ id, t, who, d, b: badge(st) }));
+    if (R.auditoria) { const f = s.af || ''; const all = this.allAud(); out.audRows = all.filter(a => !f || a.act.toLowerCase().includes(f)).map(a => Object.assign({}, a, { why: a.why || '—' })); out.af = f; out.onAf = e => this.setState({ af: e.target.value }); out.afOpts = [['', 'Todos os tipos'], ['habilit', 'Habilitação'], ['suspen', 'Suspensão'], ['revog', 'Revogação'], ['artigo', 'Base de conhecimento'], ['papel', 'Alteração de papel']].map(([v, l]) => ({ v, l })); out.audNone = out.audRows.length === 0; }
+    if (R.kb || R.kbEd) {
+      const kb = s.kb || lsGet('eloserv.adm.kb', null) || ELO.ARTS.map(a => ({ slug: a.slug, title: a.title, summary: a.summary, cat: a.cat, aud: a.aud, steps: a.steps.join('\n'), notes: a.notes.join('\n'), st: 'publicado', upd: a.upd })).concat([{ slug: 'como-responder-solicitacao', title: 'Como responder uma solicitação', summary: 'Analise, atribua um profissional e envie a proposta dentro da validade da reserva.', cat: 'Solicitações e propostas', aud: 'Empresas', steps: 'Abra a solicitação.\nAtribua um profissional disponível.\nPreencha itens, condições e validade.\nEnvie a proposta.', notes: 'Sem resposta, a reserva temporária expira.', st: 'rascunho', upd: '24/10/2026' }]);
+      out.kbRows = kb.map(a => ({ title: a.title, cat: a.cat, aud: a.aud, upd: a.upd, b: badge(a.st), href: '#/admin/ajuda/' + a.slug }));
+      out.newArt = () => { const slug = 'novo-artigo-' + (kb.length + 1); const nk = kb.concat([{ slug, title: '', summary: '', cat: 'Primeiros passos', aud: 'Clientes', steps: '', notes: '', st: 'rascunho', upd: '24/10/2026' }]); this.setState({ kb: nk }); this.go('/admin/ajuda/' + slug); };
+      if (R.kbEd) {
+        const a = kb.find(x => x.slug === seg[2]);
+        out.kMissing = !a; out.kOk = !!a;
+        if (a) {
+          const up = patch => { const nk = kb.map(x => x.slug === a.slug ? Object.assign({}, x, patch) : x); this.setState({ kb: nk, kbDirty: true }); };
+          const errs = []; if (!a.title.trim()) errs.push('Informe o título.'); if (!a.summary.trim()) errs.push('Informe o resumo.'); if (!a.steps.trim()) errs.push('Inclua ao menos um passo.');
+          Object.assign(out, {
+            k: Object.assign({}, a, { b: badge(a.st), stepList: a.steps.split('\n').filter(Boolean).map((t, i) => ({ n: i + 1, t })), noteList: a.notes.split('\n').filter(Boolean), isPub: a.st === 'publicado', notArc: a.st !== 'arquivado' }),
+            onK: Object.fromEntries(['title', 'summary', 'cat', 'aud', 'steps', 'notes'].map(f => [f, e => up({ [f]: e.target.value })])),
+            kCatOpts: ELO.HCATS.map(c => ({ v: c, l: c })), kAudOpts: ['Clientes', 'Empresas', 'Clientes e empresas'].map(c => ({ v: c, l: c })),
+            kPrev: !!s.kPrev, kEdit: !s.kPrev, togglePrev: () => this.setState({ kPrev: !s.kPrev }), prevLbl: s.kPrev ? 'Voltar à edição' : 'Visualizar',
+            kErrs: s.kTry ? errs : [], kHasErr: !!s.kTry && errs.length > 0, kDirty: !!s.kbDirty,
+            saveDraft: () => { const nk = kb.map(x => x.slug === a.slug ? Object.assign({}, x, { st: x.st === 'publicado' ? 'publicado' : 'rascunho', upd: '24/10/2026' }) : x); lsSet('eloserv.adm.kb', nk); this.setState({ kb: nk, kbDirty: false }); this.toast('Rascunho salvo.'); },
+            publish: () => { if (errs.length) { this.setState({ kTry: true }); return; } const nk = kb.map(x => x.slug === a.slug ? Object.assign({}, x, { st: 'publicado', upd: '24/10/2026' }) : x); lsSet('eloserv.adm.kb', nk); this.setState({ kb: nk, kbDirty: false, kTry: false }); this.audit('Artigo “' + a.title + '”', 'Artigo publicado'); this.toast('Artigo publicado na central de ajuda.'); },
+            archive: () => { const nk = kb.map(x => x.slug === a.slug ? Object.assign({}, x, { st: 'arquivado' }) : x); lsSet('eloserv.adm.kb', nk); this.setState({ kb: nk }); this.audit('Artigo “' + a.title + '”', 'Artigo arquivado'); this.toast('Artigo arquivado. Deixa de aparecer na central.', 'info'); }
+          });
+        }
+      }
+    }
+    return out;
+  }
+  vmModal(base) {
+    const s = this.state, m = s.modal; if (!m) return { modalOpen: false };
+    const out = { modalOpen: true, mw: Math.min(560, base.w - 24) + 'px', closeModal: this.closeModal, mtext: s.mtext || '', onMtext: e => this.setState({ mtext: e.target.value, mErr: '' }), mErr: s.mErr || '' };
+    ['enable', 'suspendCo', 'reactCo', 'archiveCo', 'suspendUser', 'lastAdmin', 'selfRole', 'role', 'invite', 'accessReq', 'prefs'].forEach(k => out['m_' + k] = m === k);
+    const need = (fn) => () => { if ((s.mtext || '').trim().length < 10) { this.setState({ mErr: 'Informe a justificativa (mínimo de 10 caracteres). Ela fica registrada na auditoria.' }); return; } fn(s.mtext.trim()); this.closeModal(); };
+    const c = s.cos.find(x => x.id === s.mid), u = s.users.find(x => x.id === s.mid);
+    out.mCo = c || {}; out.mU = u || {};
+    out.doEnable = need(why => { this.setCo(c.id, { st: 'ativa', why: '' }); if (c.id === 'gelo-fino') { try { localStorage.setItem('eloserv.demo.gelofino', 'ativa'); } catch (e) {} } this.audit('Empresa ' + c.name, 'Empresa habilitada', why); this.toast('Empresa habilitada. Perfil público disponível e registro de auditoria criado.'); });
+    out.doSuspendCo = need(why => { this.setCo(c.id, { st: 'suspensa', why }); if (c.id === 'gelo-fino') { try { localStorage.removeItem('eloserv.demo.gelofino'); } catch (e) {} } this.audit('Empresa ' + c.name, 'Empresa suspensa', why); this.toast('Empresa suspensa. Perfil oculto e novas solicitações bloqueadas.', 'warn'); });
+    out.doReactCo = need(why => { this.setCo(c.id, { st: 'ativa', why: '' }); this.audit('Empresa ' + c.name, 'Empresa reativada', why); this.toast('Empresa reativada.'); });
+    out.doArchiveCo = need(why => { this.setCo(c.id, { st: 'arquivada' }); this.audit('Empresa ' + c.name, 'Empresa arquivada', why); this.toast('Empresa arquivada. Histórico preservado.', 'info'); });
+    out.doSuspendUser = need(why => { this.setState({ users: s.users.map(x => x.id === u.id ? Object.assign({}, x, { st: 'suspenso' }) : x) }); this.audit('Usuário ' + u.n, 'Acesso suspenso', why); this.toast('Acesso suspenso.', 'warn'); });
+    out.roleOpts = ['Administrador · Suporte', 'Administrador · Operações'].map(v => ({ v, l: v })); out.roleSel = s.roleSel; out.onRole = e => this.setState({ roleSel: e.target.value });
+    out.doRole = need(why => { this.setState({ users: s.users.map(x => x.id === u.id ? Object.assign({}, x, { role: s.roleSel }) : x) }); this.audit('Usuário ' + u.n, 'Alteração de papel: ' + s.roleSel, why); this.toast('Papel atualizado.'); });
+    out.uIsAdmin = !!(u && u.scope === 'Plataforma'); out.uNotAdmin = !out.uIsAdmin;
+    out.doInvite = () => { this.setState({ users: s.users.concat([{ id: 'inv' + Date.now(), n: 'Novo convite', mail: 'no•••@exemplo.invalid', role: 'Administrador · Suporte', scope: 'Plataforma', st: 'convite' }]) }); this.audit('Convite de administrador', 'Convite criado'); this.closeModal(); this.toast('Convite criado com papel Suporte.'); };
+    out.doAccess = need(why => { this.audit('Agendamentos · ' + s.mid, 'Acesso a detalhe operacional solicitado', why); this.toast('Pedido registrado. O acesso é temporário e auditado.', 'info'); });
+    return out;
+  }
+  renderVals() {
+    const s = this.state, r = s.route, w = s.w, isMob = w < 640, isDesk = w >= 1024;
+    const seg = r.split('/').filter(Boolean), sec = seg[1] || '';
+    const frames = [['auto', 'Auto'], ['390', '390'], ['768', '768'], ['1440', '1440']];
+    const navDef = [['', 'Visão geral', 'ph-squares-four'], ['empresas', 'Empresas', 'ph-buildings'], ['usuarios', 'Usuários e acessos', 'ph-users-three'], ['publicados', 'Serviços e produtos publicados', 'ph-storefront'], ['categorias', 'Categorias', 'ph-tag'], ['agendamentos', 'Agendamentos', 'ph-calendar-blank'], ['ajuda', 'Base de conhecimento', 'ph-book-open'], ['suporte', 'Solicitações de suporte', 'ph-lifebuoy'], ['auditoria', 'Auditoria', 'ph-clock-counter-clockwise'], ['configuracoes', 'Configurações', 'ph-gear']];
+    const pendN = s.cos.filter(c => c.st === 'aguardando').length;
+    const R = { home: r === '/admin' };
+    const base = {
+      R, isMob, notMob: !isMob, isDesk, notDesk: !isDesk, w, fl: s.fl, menu: s.menu, frameRef: this.frameRef, modalRef: this.modalRef, routeTxt: r,
+      frameMax: s.frame === 'auto' ? 'none' : s.frame + 'px', frameBd: s.frame === 'auto' ? '0' : '1px dashed var(--border-strong)',
+      frameOpts: frames.map(([v, l]) => ({ l, on: s.frame === v, pick: () => this.setState({ frame: v }), bg: s.frame === v ? 'var(--accent)' : 'transparent', fg: s.frame === v ? '#FFFFFF' : 'var(--text2)' })),
+      resetDemo: () => { ['eloserv.adm.cos', 'eloserv.adm.users', 'eloserv.adm.aud', 'eloserv.demo.gelofino', 'eloserv.adm.kb'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} }); location.reload(); },
+      aNav: navDef.map(([k, l, i]) => { const cur = sec === k; return { href: '#/admin' + (k ? '/' + k : ''), l, icon: 'ph ' + i, cur: cur ? 'page' : undefined, fg: cur ? 'var(--accent-text)' : 'var(--text2)', bg: cur ? 'var(--accent-soft)' : 'transparent', count: k === 'empresas' ? pendN : k === 'suporte' ? 2 : 0 }; }),
+      crumb: sec ? (navDef.find(([k]) => k === sec) || [])[1] : '',
+      toggleMenu: () => this.setState({ menu: !s.menu }), closeMenu: () => this.setState({ menu: false }), menuOpen: !isDesk && s.menu,
+      openPrefs: () => this.openModal('prefs'),
+      themeOpts: this.segOpts([['system', 'Sistema', 'ph-desktop'], ['light', 'Claro', 'ph-sun'], ['dark', 'Escuro', 'ph-moon']], s.theme, t => { this.setState({ theme: t }); this.applyTheme(t, s.density); }),
+      densOpts: this.segOpts([['comfort', 'Conforto', 'ph-rows'], ['compact', 'Compacto', 'ph-list-dashes']], s.density, d => { this.setState({ density: d }); this.applyTheme(s.theme, d); }),
+      toast: s.toast, closeToast: () => this.setState({ toast: null }),
+      bySt: ['aguardando', 'ativa', 'preenchimento', 'suspensa', 'arquivada'].map(k => ({ b: badge(k), n: s.cos.filter(c => c.st === k).length, href: '#/admin/empresas' })),
+      pendCos: s.cos.filter(c => c.st === 'aguardando').map(c => Object.assign({}, c, { href: '#/admin/empresas/' + c.id })), noPend: pendN === 0,
+      uAct: s.users.filter(u => u.st === 'ativo').length, uSus: s.users.filter(u => u.st === 'suspenso').length, supOpen: 2,
+      recent: this.allAud().slice(0, 5)
+    };
+    if (!window.ELO) return base;
+    ['vmCos', 'vmUsers', 'vmRest', 'vmModal'].forEach(f => { if (this[f]) Object.assign(base, this[f](base, seg, R)); });
+    return base;
+  }
+}
+</script>
+</body>
+</html>

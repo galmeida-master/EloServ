@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EloServ — Empresas (protótipo)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<script>(function(){try{var t=localStorage.getItem('eloserv.theme')||'dark',d=localStorage.getItem('eloserv.density')||'comfort';var r=t==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):t;document.documentElement.setAttribute('data-theme',r);document.documentElement.setAttribute('data-density',d);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+<script src="eloserv-data.js"></script>
+<style>
+:root{--r1:4px;--r2:6px;--r3:10px;--font:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+:root,[data-theme="dark"]{color-scheme:dark;--bg:#0B1120;--surface:#111827;--raised:#1F2937;--field:#0B1120;--border:#1E293B;--border-strong:#334155;--text:#F8FAFC;--text2:#CBD5E1;--muted:#94A3B8;--accent:#2563EB;--accent-hover:#1D4ED8;--on-accent:#FFFFFF;--accent-text:#93C5FD;--accent-soft:rgba(59,130,246,.16);--ok:#4ADE80;--ok-soft:rgba(34,197,94,.14);--warn:#FBBF24;--warn-soft:rgba(245,158,11,.14);--err:#FCA5A5;--err-soft:rgba(239,68,68,.16);--neu:#CBD5E1;--neu-soft:rgba(148,163,184,.16);--focus:#93C5FD;--overlay:rgba(2,6,23,.72);--shadow:0 12px 32px rgba(0,0,0,.5)}
+[data-theme="light"]{color-scheme:light;--bg:#F8FAFC;--surface:#FFFFFF;--raised:#F1F5F9;--field:#FFFFFF;--border:#E2E8F0;--border-strong:#CBD5E1;--text:#0F172A;--text2:#475569;--muted:#64748B;--accent:#2563EB;--accent-hover:#1D4ED8;--on-accent:#FFFFFF;--accent-text:#1D4ED8;--accent-soft:#DBEAFE;--ok:#15803D;--ok-soft:#DCFCE7;--warn:#B45309;--warn-soft:#FEF3C7;--err:#B91C1C;--err-soft:#FEE2E2;--neu:#475569;--neu-soft:#F1F5F9;--focus:#1D4ED8;--overlay:rgba(15,23,42,.5);--shadow:0 12px 32px rgba(15,23,42,.16)}
+:root{--ctl:40px;--cell:14px;--gap:16px;--pad:20px}
+[data-density="compact"]{--ctl:34px;--cell:8px;--gap:12px;--pad:14px}
+@media (pointer:coarse){[data-density]{--ctl:44px}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{white-space:nowrap}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+a{color:var(--accent-text)}
+a:hover{color:var(--text)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{[data-noprint]{display:none!important}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5">
+  <div data-noprint="true" role="region" aria-label="Controles do protótipo" style="background:var(--raised);border-bottom:1px solid var(--border-strong);font-size:12px;color:var(--text2)">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:6px 16px">
+      <span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--warn)"><i class="ph ph-flask" aria-hidden="true"></i>Protótipo · dados demonstrativos fictícios</span>
+      <nav aria-label="Arquivos do protótipo" style="display:flex;flex-wrap:wrap;gap:4px">
+        <a href="EloServ.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Público + Clientes</a>
+        <a href="EloServ%20Empresas.dc.html" aria-current="page" style="padding:3px 8px;border-radius:var(--r1);background:var(--accent-soft);color:var(--accent-text);text-decoration:none;font-weight:600">Empresas</a>
+        <a href="EloServ%20Admin.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Admin</a>
+        <a href="EloServ%20Handoff.dc.html" style="padding:3px 8px;border-radius:var(--r1);color:var(--text2);text-decoration:none">Handoff</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:6px"><span>Largura</span><div role="radiogroup" aria-label="Simular largura" style="display:inline-flex;border:1px solid var(--border-strong);border-radius:var(--r1);overflow:hidden"><sc-for list="{{ frameOpts }}" as="o" hint-placeholder-count="4"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="border:0;padding:3px 8px;cursor:pointer;font-size:12px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div></div>
+      <div style="display:flex;align-items:center;gap:6px"><span>Ver como</span><div role="radiogroup" aria-label="Papel demonstrado" style="display:inline-flex;border:1px solid var(--border-strong);border-radius:var(--r1);overflow:hidden"><sc-for list="{{ roleOpts }}" as="o" hint-placeholder-count="2"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="border:0;padding:3px 8px;cursor:pointer;font-size:12px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div></div>
+      <button onClick="{{ resetDemo }}" style="border:1px solid var(--border-strong);border-radius:var(--r1);background:transparent;padding:2px 8px;font-size:12px;cursor:pointer">Restaurar dados</button>
+      <code style="margin-left:auto;font-size:12px;color:var(--muted)">{{ routeTxt }}</code>
+    </div>
+  </div>
+  <div data-noprint="{{ hideForPrint }}" style="max-width:{{ frameMax }};margin:0 auto;border-left:{{ frameBd }};border-right:{{ frameBd }}">
+    <div ref="{{ frameRef }}" style="display:flex;min-height:100vh;background:var(--bg)">
+      <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}">
+        <aside data-noprint="true" aria-label="Navegação da empresa" style="width:252px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column">
+          <a href="EloServ.dc.html#/" style="display:flex;align-items:center;gap:10px;padding:18px 20px;text-decoration:none;color:var(--text);font-weight:700"><span style="width:28px;height:28px;border-radius:var(--r2);background:var(--accent);display:grid;place-items:center;color:#FFFFFF"><i class="ph ph-link-simple" aria-hidden="true"></i></span>EloServ</a>
+          <div style="margin:0 12px 8px;padding:8px 10px;border-radius:var(--r2);background:var(--raised);font-size:12px;color:var(--text2)"><div style="font-weight:600;color:var(--text)">FrioVale Climatização</div>{{ roleLbl }} · empresa fictícia</div>
+          <nav style="display:flex;flex-direction:column;gap:2px;padding:4px 12px 16px">
+            <sc-for list="{{ eNav }}" as="n" hint-placeholder-count="12">
+              <a href="{{ n.href }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:10px;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);text-decoration:none;font-size:14px;font-weight:500;color:{{ n.fg }};background:{{ n.bg }}" style-hover="background:var(--raised);color:var(--text)"><i class="{{ n.icon }}" aria-hidden="true" style="font-size:18px"></i><span style="flex:1">{{ n.l }}</span><sc-if value="{{ n.count }}"><span style="min-width:20px;padding:0 6px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums">{{ n.count }}</span></sc-if></a>
+            </sc-for>
+          </nav>
+        </aside>
+      </sc-if>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <header data-noprint="true" style="position:sticky;top:0;z-index:15;background:var(--bg);border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:10px;min-height:60px;padding:0 var(--pad)">
+            <sc-if value="{{ notDesk }}"><button aria-label="Abrir menu" aria-expanded="{{ menu }}" onClick="{{ toggleMenu }}" style="display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border:1px solid var(--border-strong);border-radius:var(--r2);background:var(--surface);cursor:pointer;font-size:20px"><i class="ph ph-list" aria-hidden="true"></i></button></sc-if>
+            <nav aria-label="Trilha" style="display:flex;align-items:center;gap:6px;font-size:14px;min-width:0"><a href="#/empresas" style="color:var(--text2);text-decoration:none;white-space:nowrap">FrioVale</a><sc-if value="{{ crumb }}"><i class="ph ph-caret-right" aria-hidden="true" style="color:var(--muted)"></i><span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ crumb }}</span></sc-if></nav>
+            <span style="margin-left:8px;display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:var(--ok-soft);color:var(--ok);white-space:nowrap"><i class="ph ph-check-circle" aria-hidden="true"></i>Ativa</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+              <button aria-label="Ajuda" title="Ajuda contextual" onClick="{{ openHelpCtx }}" style="display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border:0;border-radius:var(--r2);background:transparent;color:var(--text2);cursor:pointer;font-size:20px" style-hover="background:var(--raised)"><i class="ph ph-question" aria-hidden="true"></i></button>
+              <button aria-label="Notificações, {{ notifCount }} não lidas" aria-expanded="{{ notif }}" onClick="{{ toggleNotif }}" style="position:relative;display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border:0;border-radius:var(--r2);background:transparent;color:var(--text2);cursor:pointer;font-size:20px" style-hover="background:var(--raised)"><i class="ph ph-bell" aria-hidden="true"></i><sc-if value="{{ notifCount }}"><span style="position:absolute;top:6px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--accent);color:#FFFFFF;font-size:10px;font-weight:700;display:grid;place-items:center">{{ notifCount }}</span></sc-if></button>
+              <button aria-label="Menu do usuário" aria-expanded="{{ umenu }}" onClick="{{ toggleUmenu }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 6px;border:0;border-radius:var(--r2);background:transparent;cursor:pointer" style-hover="background:var(--raised)"><span style="width:30px;height:30px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-size:12px;font-weight:700">{{ userIni }}</span><sc-if value="{{ notMob }}"><span style="font-size:14px;font-weight:500">{{ userName }}</span></sc-if><i class="ph ph-caret-down" aria-hidden="true" style="color:var(--muted)"></i></button>
+            </div>
+          </div>
+          <sc-if value="{{ notif }}">
+            <div role="dialog" aria-label="Notificações" style="position:absolute;right:12px;top:58px;width:min(360px,calc(100% - 24px));background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r3);box-shadow:var(--shadow);overflow:hidden">
+              <div style="padding:12px 16px;border-bottom:1px solid var(--border)"><strong style="font-size:14px">Notificações</strong></div>
+              <sc-for list="{{ notifs }}" as="n"><a href="{{ n.href }}" style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><i class="{{ n.icon }}" aria-hidden="true" style="font-size:18px;color:var(--accent-text)"></i><span style="flex:1;font-size:14px"><span style="display:block;font-weight:600">{{ n.t }}</span><span style="display:block;color:var(--text2);font-size:13px">{{ n.d }}</span></span></a></sc-for>
+              <p style="margin:0;padding:10px 16px;font-size:12px;color:var(--muted)">Notificações não incluem dados pessoais sensíveis. Falhas de e-mail não alteram reservas confirmadas.</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ umenu }}">
+            <div role="menu" aria-label="Usuário" style="position:absolute;right:12px;top:58px;width:300px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r3);box-shadow:var(--shadow);padding:8px">
+              <div style="padding:8px 10px 12px;border-bottom:1px solid var(--border)"><div style="font-weight:600">{{ userName }}</div><div style="font-size:13px;color:var(--text2)">{{ userMail }}</div></div>
+              <div style="padding:10px 10px 6px;font-size:12px;color:var(--muted)">Trocar ambiente</div>
+              <div role="menuitemradio" aria-checked="true" style="display:flex;align-items:center;gap:8px;padding:10px;border-radius:var(--r2);background:var(--accent-soft);color:var(--accent-text);font-size:14px;font-weight:600"><i class="ph ph-buildings" aria-hidden="true"></i><span style="flex:1">FrioVale Climatização<span style="display:block;font-size:12px;font-weight:500">{{ roleLbl }}</span></span><i class="ph ph-check" aria-hidden="true"></i></div>
+              <sc-if value="{{ isGestora }}"><a role="menuitemradio" aria-checked="false" href="EloServ.dc.html#/clientes" style="display:flex;align-items:center;gap:8px;padding:10px;border-radius:var(--r2);color:var(--text);text-decoration:none;font-size:14px" style-hover="background:var(--raised);color:var(--text)"><i class="ph ph-user" aria-hidden="true"></i><span>Cliente · conta pessoal<span style="display:block;font-size:12px;color:var(--text2)">Seus próprios pedidos de serviço</span></span></a></sc-if>
+              <p style="margin:4px 10px 8px;font-size:12px;color:var(--muted)">A troca usa os vínculos da sua conta. Alterar o endereço da página não concede acesso.</p>
+              <button role="menuitem" onClick="{{ openPrefs }}" style="width:100%;display:flex;align-items:center;gap:8px;padding:10px;border:0;border-radius:var(--r2);background:transparent;color:var(--text);font-size:14px;cursor:pointer;text-align:left" style-hover="background:var(--raised)"><i class="ph ph-gear" aria-hidden="true"></i>Tema e densidade</button>
+            </div>
+          </sc-if>
+        </header>
+        <main style="flex:1;padding:var(--pad);max-width:1320px;width:100%">
+          <sc-if value="{{ R.denied }}">
+            <section data-screen-label="Empresa · Permissão insuficiente" style="max-width:560px;margin:48px auto;text-align:center">
+              <i class="ph ph-lock-key" aria-hidden="true" style="font-size:40px;color:var(--err)"></i>
+              <h1 style="margin:12px 0 6px;font-size:22px">Seu papel não permite acessar esta área</h1>
+              <p style="margin:0;color:var(--text2)">Técnicos consultam a própria agenda e os atendimentos atribuídos. Configurações comerciais, equipe e base de clientes são geridas pela gestão da empresa.</p>
+              <a href="#/empresas/agenda" style="display:inline-flex;margin-top:16px;font-weight:600">Ir para minha agenda</a>
+            </section>
+          </sc-if>
+          <sc-if value="{{ R.home }}" hint-placeholder-val="{{ true }}">
+            <section data-screen-label="Empresa · Visão geral">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px">
+                <div><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Visão geral</h1><p style="margin:4px 0 0;font-size:14px;color:var(--text2);font-variant-numeric:tabular-nums">Data de referência da demonstração: sáb, 24/10/2026 · Horário de Cuiabá (UTC−4)</p></div>
+                <sc-if value="{{ isGestora }}"><a href="#/empresas/agenda" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);color:var(--text);font-size:14px;font-weight:600;text-decoration:none"><i class="ph ph-calendar-blank" aria-hidden="true"></i><span style="white-space:nowrap">Abrir agenda</span></a></sc-if>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:1px;margin-top:20px;background:var(--border);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden">
+                <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5"><a href="{{ k.href }}" style="display:block;padding:16px var(--pad);background:var(--surface);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><div style="font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ k.fg }}">{{ k.n }}</div><div style="font-size:13px;color:var(--text2)">{{ k.l }}</div></a></sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:var(--gap);align-items:start">
+                <section aria-labelledby="h-pend" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                  <h2 id="h-pend" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:15px">Precisa da sua ação</h2>
+                  <sc-for list="{{ actions }}" as="a"><a href="{{ a.href }}" style="display:flex;gap:12px;align-items:flex-start;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><i class="{{ a.icon }}" aria-hidden="true" style="font-size:18px;margin-top:2px;color:{{ a.fg }}"></i><span style="flex:1;min-width:0"><strong style="display:block;font-size:14px">{{ a.t }}</strong><span style="font-size:13px;color:var(--text2)">{{ a.d }}</span></span><i class="ph ph-caret-right" aria-hidden="true" style="color:var(--muted);margin-top:4px"></i></a></sc-for>
+                  <sc-if value="{{ noActions }}"><p style="margin:0;padding:var(--pad);font-size:14px;color:var(--text2)">Nada pendente no momento.</p></sc-if>
+                </section>
+                <section aria-labelledby="h-hoje" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                  <h2 id="h-hoje" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:15px">Atendimentos de hoje</h2>
+                  <div style="padding:20px var(--pad);display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border)"><i class="ph ph-calendar-blank" aria-hidden="true" style="font-size:24px;color:var(--muted)"></i><span style="font-size:14px;color:var(--text2)">Nenhum atendimento hoje. A empresa não atende aos sábados à tarde e não há agendamentos para a manhã.</span></div>
+                  <h3 style="margin:0;padding:12px var(--pad) 4px;font-size:13px;color:var(--muted);font-weight:600">Próximos dias</h3>
+                  <sc-for list="{{ upcoming }}" as="u"><a href="{{ u.href }}" style="display:flex;gap:12px;padding:10px var(--pad);text-decoration:none;color:var(--text);font-size:14px" style-hover="background:var(--raised);color:var(--text)"><span style="width:96px;flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--text2)">{{ u.when }}</span><span style="flex:1;min-width:0">{{ u.label }}<span style="display:block;font-size:12px;color:var(--muted)">{{ u.pro }}</span></span></a></sc-for>
+                </section>
+              </div>
+            </section>
+          </sc-if>
+          <sc-if value="{{ R.agenda }}">
+            <section data-screen-label="Empresa · Agenda">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px">
+                <div><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Agenda</h1><p style="margin:4px 0 0;font-size:14px;color:var(--text2)">Agenda consolidada: cada atendimento reserva um profissional. {{ tz }}.</p></div>
+                <sc-if value="{{ isGestora }}"><div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ toggleAvail }}" aria-expanded="{{ showAvail }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-magnifying-glass" aria-hidden="true"></i>Consultar disponibilidade</button><button onClick="{{ openBlock }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-lock-simple" aria-hidden="true"></i>Bloquear período</button></div></sc-if>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:16px">
+                <div role="radiogroup" aria-label="Dia" style="display:grid;grid-template-columns:repeat(5,minmax(56px,1fr));gap:6px;flex:1 1 320px;max-width:520px">
+                  <sc-for list="{{ aDays }}" as="d" hint-placeholder-count="5"><button role="radio" aria-checked="{{ d.on }}" onClick="{{ d.pick }}" style="min-height:52px;border-radius:var(--r2);border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.fg }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px"><span>{{ d.d }} <span style="font-variant-numeric:tabular-nums">{{ d.k }}</span></span><span style="font-size:11px;opacity:.85;font-variant-numeric:tabular-nums">{{ d.n }} atend.</span></button></sc-for>
+                </div>
+                <div role="radiogroup" aria-label="Visualização" style="display:flex;gap:4px"><sc-for list="{{ aViewOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:inline-flex;align-items:center;gap:6px;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:13px;font-weight:600;cursor:pointer"><i class="{{ o.icon }}" aria-hidden="true"></i>{{ o.l }}</button></sc-for></div>
+              </div>
+              <div aria-label="Legenda" style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12px;color:var(--text2)">
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--accent)"></span>Confirmada</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:var(--warn-soft);border:1px dashed var(--warn)"></span>Reserva temporária</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:repeating-linear-gradient(135deg,var(--neu-soft) 0 4px,transparent 4px 8px);border:1px solid var(--border-strong)"></span>Bloqueio interno</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:var(--raised)"></span>Intervalo 12:00–13:00</span>
+              </div>
+              <sc-if value="{{ showAvail }}">
+                <section aria-labelledby="h-av" style="margin-top:16px;padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between"><h2 id="h-av" style="margin:0;font-size:16px">Disponibilidade em {{ aDayFull }}</h2>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;min-width:220px">Serviço<select data-v="{{ aSvc }}" value="{{ aSvc }}" onChange="{{ onASvc }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ aSvcOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label></div>
+                  <p style="margin:8px 0 12px;font-size:13px;color:var(--text2)">Duração {{ aDur }} + preparo/deslocamento {{ aPrep }} · considera jornada, intervalo, bloqueios e atendimentos de cada profissional elegível.</p>
+                  <ul style="list-style:none;margin:0;padding:0;border-top:1px solid var(--border)"><sc-for list="{{ avail }}" as="a"><li style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center"><strong style="width:110px;font-size:14px">{{ a.n }}</strong><span style="width:180px;font-size:13px;color:var(--text2)">{{ a.st }}</span><span style="display:flex;flex-wrap:wrap;gap:4px;flex:1"><sc-for list="{{ a.times }}" as="t"><span style="padding:2px 8px;border-radius:var(--r1);background:var(--ok-soft);color:var(--ok);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">{{ t }}</span></sc-for><span style="font-size:12px;color:var(--muted)">{{ a.more }}</span></span></li></sc-for></ul>
+                  <p style="margin:12px 0 0;font-size:13px"><strong>Exibido ao cliente:</strong> <span style="font-variant-numeric:tabular-nums">{{ union }}</span><span style="display:block;font-size:12px;color:var(--muted)">O cliente vê apenas horários, sem nomes, endereços ou motivos. A vaga existe se ao menos um profissional elegível estiver livre.</span></p>
+                </section>
+              </sc-if>
+              <sc-if value="{{ dayEmpty }}"><div style="margin-top:16px;padding:40px 20px;text-align:center;border:1px dashed var(--border-strong);border-radius:var(--r3)"><i class="ph ph-calendar-blank" aria-hidden="true" style="font-size:32px;color:var(--muted)"></i><p style="margin:8px 0 0;color:var(--text2)">Agenda sem atendimentos em {{ aDayFull }}.</p></div></sc-if>
+              <sc-if value="{{ vDia }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:16px;border:1px solid var(--border);border-radius:var(--r3);background:var(--surface);overflow-x:auto" tabindex="0" aria-label="Grade do dia por profissional — role horizontalmente se necessário">
+                  <div style="display:flex;min-width:max-content">
+                    <div style="width:56px;flex-shrink:0;border-right:1px solid var(--border)"><div style="height:44px;border-bottom:1px solid var(--border)"></div><div style="position:relative;height:{{ gridH }}"><sc-for list="{{ hours }}" as="h"><span style="position:absolute;top:{{ h.top }};right:8px;transform:translateY(-50%);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums">{{ h.t }}</span></sc-for></div></div>
+                    <sc-for list="{{ cols }}" as="c" hint-placeholder-count="3">
+                      <div style="flex:1 0 {{ colMin }};min-width:{{ colMin }};border-right:1px solid var(--border)">
+                        <div style="height:44px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600">{{ c.n }}<sc-if value="{{ c.susp }}"><span style="font-size:11px;color:var(--warn)">suspenso</span></sc-if></div>
+                        <div style="position:relative;height:{{ gridH }};background:repeating-linear-gradient(to bottom,transparent 0,transparent 55px,var(--border) 55px,var(--border) 56px)">
+                          <div aria-hidden="true" style="position:absolute;left:0;right:0;top:280px;height:56px;background:var(--raised);opacity:.7"></div>
+                          <sc-for list="{{ c.evs }}" as="e"><button onClick="{{ e.open }}" aria-label="{{ e.aria }}" style="white-space:normal;position:absolute;left:4px;right:4px;top:{{ e.top }};height:{{ e.h }};overflow:hidden;text-align:left;padding:4px 8px;border-radius:var(--r1);border:{{ e.bd }};background:{{ e.bg }};color:{{ e.fg }};cursor:pointer;font-size:12px;line-height:1.3"><span style="display:flex;align-items:center;gap:4px;font-weight:700;font-variant-numeric:tabular-nums"><i class="{{ e.kicon }}" aria-hidden="true" style="color:{{ e.kfg }}"></i>{{ e.range }}</span><span style="display:block;font-weight:600">{{ e.ref }} · {{ e.t }}</span><span style="display:block;color:var(--text2)">{{ e.who }}</span></button></sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ vLista }}">
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:var(--gap)">
+                  <sc-for list="{{ listGroups }}" as="c">
+                    <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                      <h2 style="margin:0;padding:12px var(--pad);border-bottom:1px solid var(--border);font-size:15px">{{ c.n }}</h2>
+                      <sc-if value="{{ c.empty }}"><p style="margin:0;padding:12px var(--pad);font-size:14px;color:var(--text2)">Livre durante a jornada.</p></sc-if>
+                      <sc-for list="{{ c.evs }}" as="e"><button onClick="{{ e.open }}" style="white-space:normal;width:100%;display:flex;gap:12px;align-items:flex-start;min-height:56px;padding:10px var(--pad);border:0;border-bottom:1px solid var(--border);background:transparent;color:var(--text);text-align:left;cursor:pointer" style-hover="background:var(--raised)"><span style="width:92px;flex-shrink:0;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums">{{ e.range }}</span><span style="flex:1;min-width:0;font-size:14px"><span style="display:block;font-weight:600">{{ e.ref }} · {{ e.t }}</span><span style="display:block;font-size:13px;color:var(--text2)">{{ e.who }}</span><span style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;font-weight:600;color:{{ e.kfg }}"><i class="{{ e.kicon }}" aria-hidden="true"></i>{{ e.kl }}</span></span></button></sc-for>
+                    </section>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <p style="margin:16px 0 0;font-size:12px;color:var(--muted);display:flex;gap:6px"><i class="ph ph-info" aria-hidden="true" style="margin-top:2px"></i>A interface não garante sozinha a prevenção de dupla reserva. Na aplicação final, reservas são validadas e gravadas de forma transacional no servidor.</p>
+            </section>
+          </sc-if>
+          <sc-if value="{{ R.reqs }}">
+            <section data-screen-label="Empresa · Solicitações e orçamentos">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Solicitações e orçamentos</h1>
+              <p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Responda dentro do prazo da reserva temporária. Após expirar, o horário é liberado.</p>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:640px">
+                  <thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Solicitação</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Cliente</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Horário desejado</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Situação</th><th scope="col" style="text-align:left;padding:10px var(--pad) 10px 10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Agenda</th></tr></thead>
+                  <tbody><sc-for list="{{ rqRows }}" as="x" hint-placeholder-count="4"><tr style="border-bottom:1px solid var(--border)"><td style="padding:var(--cell) var(--pad)"><a href="{{ x.href }}" style="font-weight:600;text-decoration:none">{{ x.svc }}</a><div style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ x.id }}</div></td><td style="padding:var(--cell) 10px">{{ x.cli }}</td><td style="padding:var(--cell) 10px;font-variant-numeric:tabular-nums">{{ x.when }}</td><td style="padding:var(--cell) 10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ x.solB.fg }};background:{{ x.solB.bg }}"><i class="{{ x.solB.icon }}" aria-hidden="true"></i>{{ x.solB.label }}</span></td><td style="padding:var(--cell) var(--pad) var(--cell) 10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ x.occB.fg }};background:{{ x.occB.bg }}"><i class="{{ x.occB.icon }}" aria-hidden="true"></i>{{ x.occB.label }}</span><div style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ x.hold }}</div></td></tr></sc-for></tbody>
+                </table>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.req }}">
+            <sc-if value="{{ qMissing }}"><p style="padding:40px 0;text-align:center;color:var(--text2)">Solicitação não encontrada nesta empresa. <a href="#/empresas/solicitacoes">Voltar</a></p></sc-if>
+            <sc-if value="{{ qOk }}">
+              <section data-screen-label="Empresa · Análise de solicitação">
+                <a href="#/empresas/solicitacoes" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;text-decoration:none"><i class="ph ph-arrow-left" aria-hidden="true"></i>Solicitações</a>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;align-items:flex-start">
+                  <div><div style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ q.id }} · recebida em {{ q.created }}</div><h1 style="margin:2px 0 0;font-size:24px;letter-spacing:-0.02em">{{ q.svc }}</h1><div style="font-size:14px;color:var(--text2)">{{ q.cli }}</div></div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:13px;font-weight:600;color:{{ q.solB.fg }};background:{{ q.solB.bg }}"><i class="{{ q.solB.icon }}" aria-hidden="true"></i>{{ q.solB.label }}</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:13px;font-weight:600;color:{{ q.occB.fg }};background:{{ q.occB.bg }}"><i class="{{ q.occB.icon }}" aria-hidden="true"></i>{{ q.occB.label }}</span></div>
+                </div>
+                <sc-if value="{{ q.hasHold }}"><p style="margin:12px 0 0;padding:12px;border-radius:var(--r2);background:var(--warn-soft);font-size:14px;display:flex;gap:8px"><i class="ph ph-hourglass" aria-hidden="true" style="margin-top:2px;color:var(--warn)"></i>Reserva temporária válida até {{ q.hold }}. Sem resposta até lá, a solicitação expira e o horário é liberado.</p></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:var(--gap);align-items:start">
+                  <div style="display:flex;flex-direction:column;gap:var(--gap);min-width:0">
+                    <section aria-labelledby="h-qd" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                      <h2 id="h-qd" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Pedido do cliente</h2>
+                      <dl style="margin:0;padding:var(--pad);display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:10px 16px;font-size:14px"><dt style="color:var(--muted)">Horário desejado</dt><dd style="margin:0;font-variant-numeric:tabular-nums">{{ q.when }} · UTC−4</dd><dt style="color:var(--muted)">Duração estimada</dt><dd style="margin:0">{{ qDur }}</dd><dt style="color:var(--muted)">Equipamento</dt><dd style="margin:0">{{ q.equip }}</dd><dt style="color:var(--muted)">Local</dt><dd style="margin:0">{{ q.place }}</dd><dt style="color:var(--muted)">Relato</dt><dd style="margin:0;overflow-wrap:anywhere">{{ q.desc }}</dd><dt style="color:var(--muted)">Profissional</dt><dd style="margin:0">{{ q.proName }}</dd></dl>
+                    </section>
+                    <sc-if value="{{ q.canEdit }}">
+                      <section aria-labelledby="h-qa" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                        <h2 id="h-qa" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">1. Atribuir profissional</h2>
+                        <div role="radiogroup" aria-labelledby="h-qa" style="padding:var(--pad);display:flex;flex-direction:column;gap:8px">
+                          <sc-for list="{{ qPros }}" as="p"><button role="radio" aria-checked="{{ p.on }}" aria-disabled="{{ p.dis }}" onClick="{{ p.pick }}" disabled="{{ p.dis }}" style="white-space:normal;display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:48px;padding:0 14px;border-radius:var(--r2);border:1px solid {{ p.bd }};background:{{ p.bg }};color:var(--text);cursor:pointer;opacity:{{ p.op }};text-align:left"><strong style="font-size:14px">{{ p.n }}</strong><span style="font-size:13px;color:{{ p.stFg }}">{{ p.st }}</span></button></sc-for>
+                          <sc-if value="{{ qErr }}"><p role="alert" style="margin:4px 0 0;font-size:13px;color:var(--err);display:flex;gap:6px"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ qErr }}</p></sc-if>
+                          <p style="margin:4px 0 0;font-size:12px;color:var(--muted)">Considera serviços que cada profissional executa, jornada, bloqueios e 30 min de preparo/deslocamento.</p>
+                        </div>
+                      </section>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:var(--gap);min-width:0">
+                    <sc-if value="{{ q.canEdit }}">
+                      <section aria-labelledby="h-qp" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                        <h2 id="h-qp" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">2. Proposta</h2>
+                        <div style="padding:var(--pad);display:flex;flex-direction:column;gap:14px">
+                          <div><label for="pi" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Itens e valores</label><textarea id="pi" rows="2" value="{{ pf.items }}" onChange="{{ onPf.items }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px"><div><label for="pt" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Total estimado</label><input id="pt" value="{{ pf.total }}" onChange="{{ onPf.total }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-variant-numeric:tabular-nums"></div><div><label for="pv" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Validade</label><select id="pv" data-v="{{ pf.valid }}" value="{{ pf.valid }}" onChange="{{ onPf.valid }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ validOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div></div>
+                          <div><label for="pc" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Condições</label><textarea id="pc" rows="2" value="{{ pf.cond }}" onChange="{{ onPf.cond }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                          <div><label for="po" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Observações ao cliente</label><textarea id="po" rows="2" value="{{ pf.obs }}" onChange="{{ onPf.obs }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                          <p style="margin:0;font-size:13px;color:var(--text2)">Data proposta: <strong style="font-variant-numeric:tabular-nums">{{ q.when }}</strong> · Horário de Cuiabá (UTC−4)</p>
+                          <div style="display:flex;flex-wrap:wrap;gap:8px"><button onClick="{{ sendProp }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>Enviar proposta</button><button onClick="{{ askRefuse }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--err);font-size:14px;font-weight:600;cursor:pointer" style-hover="background:var(--err-soft)">Recusar solicitação</button></div>
+                        </div>
+                      </section>
+                    </sc-if>
+                    <sc-if value="{{ q.isProp }}">
+                      <section style="padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;font-size:16px">Aguardando o cliente</h2><p style="margin:6px 0 12px;font-size:14px;color:var(--text2)">Proposta enviada com {{ q.proName }}. A reserva temporária segue até {{ q.hold }}. Quando o cliente confirmar, o horário é revalidado e a ordem de serviço é criada.</p><button onClick="{{ simAccept }}" disabled="{{ qBusy }}" aria-busy="{{ qBusy }}" style="min-height:40px;padding:0 14px;border-radius:var(--r2);border:1px dashed var(--warn);background:transparent;color:var(--text);font-size:13px;font-weight:600;cursor:pointer"><i class="ph ph-flask" aria-hidden="true" style="color:var(--warn)"></i> Simular: cliente confirma a proposta</button></section>
+                    </sc-if>
+                    <sc-if value="{{ q.isAc }}"><section role="status" style="padding:var(--pad);background:var(--ok-soft);border:1px solid var(--ok);border-radius:var(--r3)"><h2 style="margin:0;font-size:16px;display:flex;gap:8px;align-items:center"><i class="ph ph-check-circle" aria-hidden="true"></i>Agendamento confirmado</h2><p style="margin:6px 0 10px;font-size:14px">Ordem de serviço {{ q.os }} criada para {{ q.proName }}.</p><a href="{{ q.osHref }}" style="font-weight:600">Abrir ordem de serviço</a></section></sc-if>
+                    <sc-if value="{{ q.isClosed }}"><p style="margin:0;padding:var(--pad);border-radius:var(--r3);background:var(--neu-soft);font-size:14px">Solicitação encerrada. Nenhum horário reservado.</p></sc-if>
+                    <section aria-labelledby="h-qt" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 id="h-qt" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Histórico</h2><ol style="list-style:none;margin:0;padding:var(--pad);display:flex;flex-direction:column;gap:12px"><sc-for list="{{ q.tl }}" as="e"><li style="font-size:14px"><span style="display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ e.t }}</span>{{ e.d }}</li></sc-for></ol></section>
+                  </div>
+                </div>
+              </section>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ R.oss }}">
+            <section data-screen-label="Empresa · Ordens de serviço">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">{{ ossTitle }}</h1>
+              <ul style="list-style:none;margin:16px 0 0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                <sc-for list="{{ osRows }}" as="o" hint-placeholder-count="6"><li style="border-bottom:1px solid var(--border)"><a href="{{ o.href }}" style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><span style="width:80px;font-size:13px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums">{{ o.id }}</span><span style="flex:1 1 220px;min-width:0"><strong style="display:block;font-size:14px">{{ o.svc }}</strong><span style="font-size:13px;color:var(--text2)">{{ o.cli }} · {{ o.pro }}</span></span><span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--text2)">{{ o.when }}</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ o.b.fg }};background:{{ o.b.bg }}"><i class="{{ o.b.icon }}" aria-hidden="true"></i>{{ o.b.label }}</span></a></li></sc-for>
+              </ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.os }}">
+            <sc-if value="{{ oMissing }}"><section style="padding:40px 0;text-align:center"><h1 style="font-size:20px;margin:0">Ordem não disponível</h1><p style="color:var(--text2)">Ela não existe ou não está atribuída a você.</p><a href="#/empresas/ordens">Voltar</a></section></sc-if>
+            <sc-if value="{{ oOk }}">
+              <section data-screen-label="Empresa · Ordem de serviço">
+                <a href="#/empresas/ordens" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;text-decoration:none"><i class="ph ph-arrow-left" aria-hidden="true"></i>Ordens de serviço</a>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;align-items:flex-start">
+                  <div><div style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ o.id }}</div><h1 style="margin:2px 0 0;font-size:24px;letter-spacing:-0.02em">{{ o.svc }}</h1><div style="font-size:14px;color:var(--text2)">{{ o.cli }}</div></div>
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;color:{{ o.b.fg }};background:{{ o.b.bg }}"><i class="{{ o.b.icon }}" aria-hidden="true"></i>{{ o.b.label }}</span><button onClick="{{ printOS }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-printer" aria-hidden="true"></i>Resumo imprimível</button></div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:var(--gap);align-items:start">
+                  <section aria-labelledby="h-od" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                    <h2 id="h-od" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Dados do atendimento</h2>
+                    <dl style="margin:0;padding:var(--pad);display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:10px 16px;font-size:14px"><dt style="color:var(--muted)">Agendamento</dt><dd style="margin:0;font-variant-numeric:tabular-nums">{{ o.when }} · UTC−4</dd><dt style="color:var(--muted)">Profissional</dt><dd style="margin:0">{{ o.proName }}</dd><dt style="color:var(--muted)">Cliente</dt><dd style="margin:0">{{ o.cli }}</dd><dt style="color:var(--muted)">Equipamento</dt><dd style="margin:0">{{ o.equip }}</dd><dt style="color:var(--muted)">Relato inicial</dt><dd style="margin:0">{{ o.relato }}</dd></dl>
+                  </section>
+                  <section aria-labelledby="h-oe" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                    <h2 id="h-oe" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Execução</h2>
+                    <div style="padding:var(--pad)">
+                      <sc-if value="{{ o.isAg }}"><p style="margin:0 0 12px;font-size:14px;color:var(--text2)">Inicie quando chegar ao local. O cliente acompanha a mudança de situação.</p><button onClick="{{ startOS }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-play" aria-hidden="true"></i>Iniciar execução</button></sc-if>
+                      <sc-if value="{{ o.isEx }}">
+                        <div style="display:flex;flex-direction:column;gap:14px">
+                          <div><label for="ow" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Trabalho realizado <span style="color:var(--err)">*</span></label><textarea id="ow" rows="4" value="{{ ed.work }}" onChange="{{ onEd.work }}" aria-describedby="ow-err" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ oErr }}"><p id="ow-err" role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err);display:flex;gap:6px"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ oErr }}</p></sc-if></div>
+                          <div><label for="oo" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Observações</label><textarea id="oo" rows="2" value="{{ ed.obs }}" onChange="{{ onEd.obs }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+                          <div><label for="on" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Próximo retorno sugerido</label><select id="on" data-v="{{ ed.next }}" value="{{ ed.next }}" onChange="{{ onEd.next }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ nextOpts }}" as="x"><option value="{{ x.v }}">{{ x.l }}</option></sc-for></select></div>
+                          <div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ finishOS }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-check" aria-hidden="true"></i>Concluir atendimento</button><button onClick="{{ saveObs }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Salvar rascunho</button></div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ o.isDone }}"><dl style="margin:0;display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:10px 16px;font-size:14px"><dt style="color:var(--muted)">Trabalho realizado</dt><dd style="margin:0">{{ o.work }}</dd><dt style="color:var(--muted)">Observações</dt><dd style="margin:0">{{ o.obs }}</dd><dt style="color:var(--muted)">Próximo retorno</dt><dd style="margin:0">{{ o.next }}</dd></dl></sc-if>
+                      <sc-if value="{{ o.isCanc }}"><p style="margin:0;font-size:14px;color:var(--text2)">{{ o.obs }}</p></sc-if>
+                    </div>
+                  </section>
+                </div>
+                <section aria-labelledby="h-oh" style="margin-top:var(--gap);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 id="h-oh" style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Histórico de alterações</h2><ol style="list-style:none;margin:0;padding:var(--pad);display:flex;flex-direction:column;gap:10px"><sc-for list="{{ o.hist }}" as="h"><li style="font-size:14px"><span style="display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ h.b }}</span>{{ h.a }}</li></sc-for></ol></section>
+                <p style="margin:12px 0 0;font-size:12px;color:var(--muted)">O resumo da ordem não substitui documento fiscal, laudo técnico ou certificação.</p>
+              </section>
+            </sc-if>
+          </sc-if>
+          <sc-if value="{{ R.pros }}">
+            <section data-screen-label="Empresa · Profissionais">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Profissionais</h1><button onClick="{{ invite }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-user-plus" aria-hidden="true"></i>Convidar profissional</button></div>
+              <ul style="list-style:none;margin:16px 0 0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)">
+                <sc-for list="{{ proRows }}" as="p" hint-placeholder-count="4"><li style="border-bottom:1px solid var(--border)"><a href="{{ p.href }}" style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);text-decoration:none;color:var(--text)" style-hover="background:var(--raised);color:var(--text)"><span style="flex:1 1 200px;min-width:0"><strong style="display:block;font-size:14px">{{ p.n }}</strong><span style="font-size:13px;color:var(--text2)">{{ p.role }} · {{ p.svcs }}</span></span><span style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">{{ p.fut }} atendimentos futuros</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ p.b.fg }};background:{{ p.b.bg }}"><i class="{{ p.b.icon }}" aria-hidden="true"></i>{{ p.b.label }}</span></a></li></sc-for>
+              </ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.proD }}">
+            <sc-if value="{{ pMissing }}"><p style="padding:40px 0;text-align:center">Profissional não encontrado. <a href="#/empresas/profissionais">Voltar</a></p></sc-if>
+            <sc-if value="{{ pOk }}">
+              <section data-screen-label="Empresa · Profissional">
+                <a href="#/empresas/profissionais" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;text-decoration:none"><i class="ph ph-arrow-left" aria-hidden="true"></i>Profissionais</a>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;align-items:flex-start">
+                  <div><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">{{ p.n }}</h1><div style="font-size:14px;color:var(--text2)">{{ p.role }} · {{ p.mail }}</div></div>
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;color:{{ p.b.fg }};background:{{ p.b.bg }}"><i class="{{ p.b.icon }}" aria-hidden="true"></i>{{ p.b.label }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:var(--gap);margin-top:var(--gap);align-items:start">
+                  <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Função e jornada</h2><dl style="margin:0;padding:var(--pad);display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:10px 16px;font-size:14px"><dt style="color:var(--muted)">Serviços</dt><dd style="margin:0">{{ p.svcTxt }}</dd><dt style="color:var(--muted)">Jornada</dt><dd style="margin:0">{{ p.jor }}</dd><dt style="color:var(--muted)">Permissões</dt><dd style="margin:0">Própria agenda, atendimentos atribuídos, registro de execução.</dd></dl></section>
+                  <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Acesso</h2>
+                    <div style="padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+                      <sc-if value="{{ p.isActive }}"><p style="margin:0;font-size:14px;color:var(--text2)">Suspender bloqueia o acesso temporariamente. Revogar encerra o vínculo com a empresa. Em ambos, o histórico é preservado.</p><div style="display:flex;flex-wrap:wrap;gap:8px"><button onClick="{{ askSuspend }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Suspender acesso</button><button onClick="{{ openRv }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--err);background:transparent;color:var(--err);font-size:14px;font-weight:600;cursor:pointer">Revogar acesso</button></div></sc-if>
+                      <sc-if value="{{ p.isSusp }}"><p style="margin:0;font-size:14px">Acesso suspenso. Atendimentos atribuídos continuam visíveis para a gestão.</p><button onClick="{{ reactivate }}" style="align-self:flex-start;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Reativar acesso</button></sc-if>
+                      <sc-if value="{{ p.isInv }}"><p style="margin:0;font-size:14px">Convite enviado em 20/10/2026, ainda não aceito.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ resend }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Reenviar convite</button><button onClick="{{ revokeInv }}" style="min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--err);font-size:14px;font-weight:600;cursor:pointer">Revogar convite</button></div></sc-if>
+                      <sc-if value="{{ p.isRev }}"><p role="status" style="margin:0;padding:12px;border-radius:var(--r2);background:var(--neu-soft);font-size:14px">Acesso revogado. O nome continua nas ordens e no histórico já registrados.</p></sc-if>
+                    </div>
+                  </section>
+                </div>
+                <sc-if value="{{ rvOpen }}">
+                  <section aria-labelledby="h-rv" style="margin-top:var(--gap);border:1px solid var(--err);border-radius:var(--r3);background:var(--surface)">
+                    <div style="padding:14px var(--pad);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;align-items:center"><h2 id="h-rv" style="margin:0;font-size:16px">Revogar acesso de {{ p.short }}</h2><button onClick="{{ closeRv }}" aria-label="Fechar" style="width:36px;height:36px;border:0;background:transparent;cursor:pointer;font-size:18px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+                    <div style="padding:var(--pad)">
+                      <p style="margin:0 0 12px;font-size:14px"><strong>Etapa 1 · Revisar atendimentos futuros.</strong> Nenhum atendimento é cancelado automaticamente. Escolha um tratamento para cada um.</p>
+                      <sc-if value="{{ rvNone }}"><p style="margin:0 0 12px;font-size:14px;color:var(--text2)">Sem atendimentos futuros.</p></sc-if>
+                      <ul style="list-style:none;margin:0 0 16px;padding:0;border-top:1px solid var(--border)"><sc-for list="{{ rvItems }}" as="i"><li style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)"><span style="flex:1 1 220px;min-width:0"><strong style="display:block;font-size:14px">{{ i.ref }} · {{ i.t }}</strong><span style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">{{ i.when }} · {{ i.kl }}</span></span><label style="flex:1 1 260px;font-size:13px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tratamento para {{ i.ref }}</span><select data-v="{{ i.cur }}" value="{{ i.cur }}" onChange="{{ i.onPick }}" style="width:100%;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-for list="{{ i.opts }}" as="o"><option value="{{ o.v }}" disabled="{{ o.dis }}">{{ o.l }}</option></sc-for></select></label><sc-if value="{{ i.done }}"><i class="ph ph-check-circle" aria-label="Tratado" style="color:var(--ok);font-size:20px"></i></sc-if><sc-if value="{{ i.pend }}"><i class="ph ph-warning-circle" aria-label="Pendente" style="color:var(--warn);font-size:20px"></i></sc-if></li></sc-for></ul>
+                      <label for="rvw" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px"><strong>Etapa 2 · Justificativa</strong> (registrada na auditoria)</label>
+                      <textarea id="rvw" rows="2" value="{{ rvWhy }}" onChange="{{ onRvWhy }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea>
+                      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px"><button onClick="{{ doRevoke }}" disabled="{{ rvCant }}" style="min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer;opacity:1">Revogar acesso</button><span aria-live="polite" style="font-size:13px;color:var(--text2)">{{ rvHint }}</span></div>
+                      <p style="margin:12px 0 0;font-size:12px;color:var(--muted)">O histórico de atendimentos e ordens permanece. O profissional deixa de acessar a empresa imediatamente.</p>
+                    </div>
+                  </section>
+                </sc-if>
+                <section style="margin-top:var(--gap);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Histórico do vínculo</h2><ul style="list-style:none;margin:0;padding:var(--pad);display:flex;flex-direction:column;gap:8px"><sc-for list="{{ pHist }}" as="h"><li style="font-size:14px"><span style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ h.a }}</span> · {{ h.b }}</li></sc-for></ul></section>
+              </section>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ R.perfil }}">
+            <section data-screen-label="Empresa · Perfil da empresa" style="max-width:900px">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Perfil da empresa</h1>
+              <div style="margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--warn)"><i class="ph ph-flask" aria-hidden="true"></i>Simular situação:<div role="radiogroup" aria-label="Situação simulada" style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ coOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:12px;font-weight:600;cursor:pointer">{{ o.l }}</button></sc-for></div></div>
+              <div role="status" style="margin-top:12px;padding:14px;border-radius:var(--r2);background:{{ coBg }};font-size:14px"><strong style="color:{{ coFg }}">Situação: {{ coLbl }}</strong><p style="margin:4px 0 0">{{ coTxt }}</p></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:var(--gap);margin-top:var(--gap)">
+                <section style="padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font-size:16px">Identificação</h2>
+                  <div><label for="c1" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Nome da empresa</label><input id="c1" value="FrioVale Climatização" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></div>
+                  <div><label for="c2" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Razão social <span style="font-weight:400;color:var(--muted)">(quando aplicável)</span></label><input id="c2" value="FrioVale Serviços de Climatização (fictícia)" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></div>
+                  <div><label for="c3" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">CNPJ</label><input id="c3" value="00.000.000/0000-00" readonly aria-describedby="c3h" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--raised);color:var(--text2);font-size:14px;font-variant-numeric:tabular-nums"><p id="c3h" style="margin:6px 0 0;font-size:12px;color:var(--muted)">Valor fictício. Alteração exige nova análise cadastral.</p></div>
+                  <div><label for="c4" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Descrição pública</label><textarea id="c4" rows="3" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px">Equipe de três técnicos dedicada a instalação, higienização e manutenção de ar-condicionado split em residências e pequenos comércios.</textarea></div>
+                </section>
+                <section style="padding:var(--pad);background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font-size:16px">Contatos</h2>
+                  <fieldset style="border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin:0"><legend style="font-size:13px;font-weight:700;padding:0 4px">Públicos · exibidos no perfil</legend><div style="display:flex;flex-direction:column;gap:6px;font-size:14px"><span>(65) 0000-0001 · telefone e WhatsApp manual</span><span>contato@friovale.exemplo</span></div></fieldset>
+                  <fieldset style="border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin:0"><legend style="font-size:13px;font-weight:700;padding:0 4px">Privados · apenas EloServ e equipe</legend><div style="display:flex;flex-direction:column;gap:6px;font-size:14px"><span>Responsável: Marina Duarte</span><span>marina.demo@exemplo.invalid</span></div></fieldset>
+                  <h2 style="margin:8px 0 0;font-size:16px">Atendimento</h2>
+                  <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px"><dt style="color:var(--muted)">Cidade</dt><dd style="margin:0">Cuiabá</dd><dt style="color:var(--muted)">Área</dt><dd style="margin:0">Cuiabá e Várzea Grande</dd><dt style="color:var(--muted)">Horários</dt><dd style="margin:0">Seg a sex 07:30–17:30 · Sáb 08:00–12:00</dd><dt style="color:var(--muted)">Políticas</dt><dd style="margin:0">Cancelamento sem custo até 12h antes.</dd></dl>
+                </section>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.servicos }}">
+            <section data-screen-label="Empresa · Serviços">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Serviços</h1><button onClick="{{ toggleSvEmpty }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px dashed var(--warn);background:transparent;color:var(--text);font-size:12px;cursor:pointer">{{ svEmptyLbl }}</button></div>
+              <sc-if value="{{ svEmpty }}"><div style="margin-top:16px;padding:48px 20px;text-align:center;border:1px dashed var(--border-strong);border-radius:var(--r3)"><i class="ph ph-wrench" aria-hidden="true" style="font-size:32px;color:var(--muted)"></i><h2 style="margin:10px 0 4px;font-size:17px">Sua empresa ainda não tem serviços</h2><p style="margin:0 auto;max-width:440px;color:var(--text2);font-size:14px">Cadastre ao menos um serviço com duração e forma de preço para receber solicitações no perfil público.</p><button style="margin-top:14px;min-height:var(--ctl);padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer" onClick="{{ toggleSvEmpty }}">Cadastrar primeiro serviço</button></div></sc-if>
+              <sc-if value="{{ svHas }}" hint-placeholder-val="{{ true }}">
+                <label style="display:block;position:relative;max-width:360px;margin-top:16px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar serviço</span><i class="ph ph-magnifying-glass" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)"></i><input type="search" value="{{ svQ }}" onChange="{{ onSvQ }}" placeholder="Buscar serviço" style="width:100%;min-height:var(--ctl);padding:0 12px 0 36px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></label>
+                <div style="margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:680px"><thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Serviço</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Duração</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Preço</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Situação</th><th scope="col" style="text-align:right;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Ações</th></tr></thead><tbody><sc-for list="{{ svRows }}" as="v" hint-placeholder-count="6"><tr style="border-bottom:1px solid var(--border)"><td style="padding:var(--cell) var(--pad)"><strong>{{ v.n }}</strong><div style="font-size:12px;color:var(--muted)">{{ v.uses }}</div></td><td style="padding:var(--cell) 10px;font-variant-numeric:tabular-nums">{{ v.dur }}</td><td style="padding:var(--cell) 10px;font-variant-numeric:tabular-nums">{{ v.price }}</td><td style="padding:var(--cell) 10px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ v.b.fg }};background:{{ v.b.bg }}"><i class="{{ v.b.icon }}" aria-hidden="true"></i>{{ v.b.label }}</span><div style="font-size:12px;color:var(--muted)">{{ v.note }}</div></td><td style="padding:var(--cell) var(--pad);text-align:right;white-space:nowrap"><sc-if value="{{ v.notArc }}"><button onClick="{{ v.toggle }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer">Ativar/desativar</button> <button onClick="{{ v.archive }}" style="min-height:32px;padding:0 10px;border-radius:var(--r2);border:1px solid transparent;background:transparent;color:var(--text2);font-size:13px;cursor:pointer">Arquivar</button></sc-if></td></tr></sc-for></tbody></table></div>
+              </sc-if>
+              <sc-if value="{{ svNone }}"><p style="margin:16px 0 0;color:var(--text2)">Nenhum serviço corresponde à busca.</p></sc-if>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.produtos }}">
+            <section data-screen-label="Empresa · Produtos">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Produtos</h1><p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Catálogo informativo. Sem carrinho, estoque integrado ou entrega nesta versão.</p>
+              <ul style="list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ prRows }}" as="p"><li style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span style="flex:1 1 220px"><strong style="font-size:14px">{{ p.name }}</strong><span style="display:block;font-size:13px;color:var(--text2)">{{ p.desc }}</span></span><span style="font-size:14px;font-variant-numeric:tabular-nums">{{ p.price }}</span><span style="font-size:13px;color:var(--text2)">{{ p.avail }}</span></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.clientes }}">
+            <section data-screen-label="Empresa · Clientes e equipamentos">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Clientes e equipamentos</h1><button onClick="{{ addCli }}" style="display:inline-flex;align-items:center;gap:8px;min-height:var(--ctl);padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-plus" aria-hidden="true"></i>Cliente atendido fora do catálogo</button></div>
+              <p style="margin:4px 0 0;font-size:14px;color:var(--text2)">Cadastro operacional da FrioVale. Dados de conta pessoal dos clientes não são editáveis aqui.</p>
+              <label style="display:block;position:relative;max-width:360px;margin-top:16px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar cliente</span><i class="ph ph-magnifying-glass" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)"></i><input type="search" value="{{ clQ }}" onChange="{{ onClQ }}" placeholder="Buscar cliente" style="width:100%;min-height:var(--ctl);padding:0 12px 0 36px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></label>
+              <div style="margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:640px"><thead><tr><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Cliente</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Cidade</th><th scope="col" style="text-align:right;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Equip.</th><th scope="col" style="text-align:left;padding:10px;font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Último atendimento</th><th scope="col" style="text-align:left;padding:10px var(--pad);font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Origem</th></tr></thead><tbody><sc-for list="{{ clRows }}" as="c" hint-placeholder-count="8"><tr style="border-bottom:1px solid var(--border)"><td style="padding:var(--cell) var(--pad);max-width:320px;overflow-wrap:anywhere">{{ c.n }}</td><td style="padding:var(--cell) 10px">{{ c.city }}</td><td style="padding:var(--cell) 10px;text-align:right;font-variant-numeric:tabular-nums">{{ c.eq }}</td><td style="padding:var(--cell) 10px;font-variant-numeric:tabular-nums">{{ c.last }}</td><td style="padding:var(--cell) var(--pad);font-size:13px;color:var(--text2)">{{ c.src }}</td></tr></sc-for></tbody></table></div>
+              <nav aria-label="Paginação" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px"><span style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">{{ clInfo }}</span><div style="display:flex;gap:4px"><button onClick="{{ clPrev }}" disabled="{{ clNoPrev }}" aria-label="Página anterior" style="width:var(--ctl);height:var(--ctl);border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);cursor:pointer"><i class="ph ph-caret-left" aria-hidden="true"></i></button><sc-for list="{{ clPages }}" as="p"><button onClick="{{ p.pick }}" aria-current="{{ p.cur }}" style="min-width:var(--ctl);height:var(--ctl);border-radius:var(--r2);border:1px solid var(--border-strong);background:{{ p.bg }};color:{{ p.fg }};font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums">{{ p.n }}</button></sc-for><button onClick="{{ clNext }}" disabled="{{ clNoNext }}" aria-label="Próxima página" style="width:var(--ctl);height:var(--ctl);border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);cursor:pointer"><i class="ph ph-caret-right" aria-hidden="true"></i></button></div></nav>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.historico }}">
+            <section data-screen-label="Empresa · Histórico e retornos">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Histórico e retornos</h1><p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Retornos sugeridos ao concluir ordens de serviço. Contato com o cliente é manual nesta versão.</p>
+              <ul style="list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><sc-for list="{{ retRows }}" as="r"><li style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span style="flex:1 1 220px"><strong style="font-size:14px">{{ r.c }}</strong><span style="display:block;font-size:13px;color:var(--text2)">{{ r.sv }}</span></span><span style="font-size:14px">{{ r.w }}</span><a href="{{ r.href }}" style="font-size:13px;font-weight:600">{{ r.os }}</a></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.ajuda }}">
+            <section data-screen-label="Empresa · Ajuda">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Ajuda</h1><p style="margin:4px 0 16px;font-size:14px;color:var(--text2)">Os artigos abrem em painel lateral, sem sair da tela atual. <a href="EloServ.dc.html#/ajuda">Central completa</a></p>
+              <ul style="list-style:none;margin:0;padding:0;border-top:1px solid var(--border)"><sc-for list="{{ eArts }}" as="a"><li style="border-bottom:1px solid var(--border)"><button onClick="{{ a.open }}" style="white-space:normal;width:100%;text-align:left;padding:14px 4px;border:0;background:transparent;color:var(--text);cursor:pointer" style-hover="background:var(--surface)"><strong style="display:block">{{ a.title }}</strong><span style="font-size:14px;color:var(--text2)">{{ a.summary }} · Para: {{ a.aud }}</span></button></li></sc-for></ul>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ R.configuracoes }}">
+            <section data-screen-label="Empresa · Configurações" style="max-width:980px">
+              <h1 style="margin:0;font-size:24px;letter-spacing:-0.02em">Configurações da agenda</h1>
+              <div style="display:flex;flex-direction:column;gap:var(--gap);margin-top:16px">
+                <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Jornada individual e intervalos</h2><ul style="list-style:none;margin:0;padding:0"><sc-for list="{{ jorRows }}" as="j"><li style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><strong style="width:110px;font-size:14px">{{ j.n }}</strong><span style="flex:1 1 240px;font-size:14px;font-variant-numeric:tabular-nums">{{ j.jor }}</span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ j.b.fg }};background:{{ j.b.bg }}">{{ j.b.label }}</span></li></sc-for></ul></section>
+                <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Duração estimada por serviço</h2><div style="padding:var(--pad);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px"><sc-for list="{{ durRows }}" as="d"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">{{ d.n }}<span style="display:flex;align-items:center;gap:8px"><input type="number" min="15" step="15" value="{{ d.dur }}" style="width:100px;min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-variant-numeric:tabular-nums"><span style="font-weight:400;color:var(--text2)">min</span></span></label></sc-for></div></section>
+                <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Regras de reserva</h2>
+                  <div style="padding:var(--pad);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px">
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Preparo/deslocamento entre atendimentos<select style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><option>15 min</option><option selected="true">30 min</option><option>45 min</option><option>60 min</option></select><span style="font-weight:400;font-size:12px;color:var(--muted)">Valor fixo informado pela empresa. Não há cálculo automático de rotas.</span></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Validade da reserva temporária<select style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><option>12 horas</option><option selected="true">24 horas</option><option>48 horas</option></select><span style="font-weight:400;font-size:12px;color:var(--muted)">Após o prazo sem resposta, a solicitação expira e libera o horário.</span></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Fuso horário da empresa<select style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ tzOpts }}" as="t"><option value="{{ t.v }}">{{ t.l }}</option></sc-for></select><span style="font-weight:400;font-size:12px;color:var(--muted)">Exibido na revisão e confirmação. Instantes são armazenados de forma consistente e convertidos na apresentação.</span></label>
+                  </div>
+                </section>
+                <section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r3)"><h2 style="margin:0;padding:14px var(--pad);border-bottom:1px solid var(--border);font-size:16px">Feriados e exceções</h2><ul style="list-style:none;margin:0;padding:0;font-size:14px"><li style="display:flex;justify-content:space-between;gap:12px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span>Seg, 02/11/2026 · Finados</span><span style="color:var(--text2)">Fechado</span></li><li style="display:flex;justify-content:space-between;gap:12px;padding:var(--cell) var(--pad);border-bottom:1px solid var(--border)"><span>Sex, 20/11/2026 · Exceção manual</span><span style="color:var(--text2)">Atendimento até 12:00</span></li></ul><p style="margin:0;padding:12px var(--pad);font-size:12px;color:var(--muted)">Feriados são cadastrados manualmente pela empresa nesta versão.</p></section>
+                <div><button onClick="{{ saveCfg }}" style="min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Salvar configurações</button></div>
+              </div>
+            </section>
+          </sc-if>
+          <div data-slot="e1"></div>
+        </main>
+      </div>
+    </div>
+    <sc-if value="{{ menuOpen }}">
+      <div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:40;background:var(--overlay)"></div>
+      <nav aria-label="Navegação da empresa" style="position:fixed;top:0;bottom:0;left:{{ fl }}px;z-index:41;width:min(300px,85vw);background:var(--surface);border-right:1px solid var(--border-strong);box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:2px;overflow:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px 12px"><strong>FrioVale Climatização</strong><button aria-label="Fechar menu" onClick="{{ closeMenu }}" style="width:44px;height:44px;border:0;background:transparent;cursor:pointer;font-size:20px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+        <sc-for list="{{ eNav }}" as="n"><a href="{{ n.href }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r2);text-decoration:none;font-size:15px;color:{{ n.fg }};background:{{ n.bg }}"><i class="{{ n.icon }}" aria-hidden="true" style="font-size:18px"></i>{{ n.l }}</a></sc-for>
+      </nav>
+    </sc-if>
+  </div>
+  <sc-if value="{{ modalOpen }}">
+    <div style="position:fixed;inset:0;z-index:50;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:12px">
+      <div ref="{{ modalRef }}" role="dialog" aria-modal="true" aria-labelledby="m-title" style="width:{{ mw }};max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r3);box-shadow:var(--shadow)">
+        <sc-if value="{{ m_block }}">
+          <div style="padding:20px 20px 0;display:flex;justify-content:space-between;gap:12px"><h2 id="m-title" style="margin:0;font-size:18px">Bloquear período</h2><button onClick="{{ openBlockHelp }}" style="display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--accent-text);font-size:13px;font-weight:600;cursor:pointer"><i class="ph ph-question" aria-hidden="true"></i>Como funciona?</button></div>
+          <div style="padding:16px 20px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Profissional<select data-v="{{ b.pro }}" value="{{ b.pro }}" onChange="{{ onB.pro }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ bProOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Data<select data-v="{{ b.day }}" value="{{ b.day }}" onChange="{{ onB.day }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400"><sc-for list="{{ bDayOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+          </div>
+          <label style="display:flex;align-items:center;gap:10px;margin:12px 20px 0;font-size:14px;min-height:40px;cursor:pointer"><input type="checkbox" checked="{{ b.all }}" onChange="{{ onB.all }}" style="width:18px;height:18px;accent-color:var(--accent)">Dia inteiro (jornada completa)</label>
+          <sc-if value="{{ b.notAll }}"><div style="padding:8px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:14px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Início<select data-v="{{ b.st }}" value="{{ b.st }}" onChange="{{ onB.st }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400;font-variant-numeric:tabular-nums"><sc-for list="{{ timeOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Fim<select data-v="{{ b.en }}" value="{{ b.en }}" onChange="{{ onB.en }}" style="min-height:var(--ctl);padding:0 10px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px;font-weight:400;font-variant-numeric:tabular-nums"><sc-for list="{{ timeOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label></div></sc-if>
+          <div style="padding:12px 20px 0"><label for="bw" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Motivo interno <span style="font-weight:400;color:var(--muted)">(não aparece para clientes)</span></label><input id="bw" value="{{ b.why }}" onChange="{{ onB.why }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></div>
+          <sc-if value="{{ mErr }}"><p role="alert" style="margin:10px 20px 0;font-size:13px;color:var(--err);display:flex;gap:6px"><i class="ph ph-warning-circle" aria-hidden="true"></i>{{ mErr }}</p></sc-if>
+          <sc-if value="{{ bHasConf }}">
+            <div role="alert" style="margin:14px 20px 0;padding:14px;border-radius:var(--r2);border:1px solid var(--err);background:var(--err-soft);font-size:14px">
+              <strong style="display:flex;gap:8px;align-items:center"><i class="ph ph-calendar-x" aria-hidden="true" style="color:var(--err)"></i>O período conflita com atendimentos existentes</strong>
+              <ul style="margin:8px 0 0;padding-left:20px"><sc-for list="{{ bConf }}" as="c"><li><a href="{{ c.href }}" style="font-variant-numeric:tabular-nums">{{ c.l }}</a></li></sc-for></ul>
+              <p style="margin:8px 0 0">O bloqueio não foi salvo. Bloqueios não cancelam atendimentos automaticamente: reatribua ou reagende-os antes, ou escolha um período livre.</p>
+              <sc-if value="{{ bNoAlts }}"><p style="margin:8px 0 0;color:var(--text2)">Não há períodos livres com essa duração neste dia.</p></sc-if>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"><sc-for list="{{ bAlts }}" as="a"><button onClick="{{ a.pick }}" style="min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer">Usar {{ a.l }}</button></sc-for></div>
+            </div>
+          </sc-if>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:20px;flex-wrap:wrap"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ saveBlock }}" style="min-height:44px;padding:0 18px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Salvar bloqueio</button></div>
+        </sc-if>
+        <sc-if value="{{ m_blkInfo }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">{{ blk.ref }} · {{ blk.t }}</h2><dl style="margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px"><dt style="color:var(--muted)">Profissional</dt><dd style="margin:0">{{ blk.pro }}</dd><dt style="color:var(--muted)">Período</dt><dd style="margin:0;font-variant-numeric:tabular-nums">{{ blk.when }}</dd><dt style="color:var(--muted)">Motivo interno</dt><dd style="margin:0">{{ blk.c }}</dd></dl></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Fechar</button><button onClick="{{ removeBlk }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Remover bloqueio</button></div>
+        </sc-if>
+        <sc-if value="{{ m_refuseReq }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Recusar solicitação?</h2><p style="margin:6px 0 14px;font-size:14px;color:var(--text2)">A reserva temporária será liberada e o cliente será notificado.</p><label for="rr" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Motivo ao cliente <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><textarea id="rr" rows="3" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Voltar</button><button onClick="{{ doRefuseReq }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Recusar</button></div>
+        </sc-if>
+        <sc-if value="{{ m_print }}">
+          <div style="padding:20px;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)" data-noprint="true"><h2 id="m-title" style="margin:0;font-size:18px">Resumo imprimível</h2><div style="display:flex;gap:8px"><button onClick="{{ doPrint }}" style="display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer"><i class="ph ph-printer" aria-hidden="true"></i>Imprimir</button><button onClick="{{ closeModal }}" style="min-height:40px;padding:0 14px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;cursor:pointer">Fechar</button></div></div>
+          <article style="margin:20px;padding:28px;background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:var(--r2);font-size:12pt;line-height:1.5">
+            <div style="display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid #0F172A;padding-bottom:10px"><div><strong style="font-size:16pt">FrioVale Climatização</strong><div style="font-size:10pt;color:#475569">Empresa fictícia · (65) 0000-0001</div></div><div style="text-align:right"><strong style="font-size:14pt">{{ pr.id }}</strong><div style="font-size:10pt;color:#475569">{{ pr.b.label }}</div></div></div>
+            <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:11pt"><tbody><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;width:34%;color:#475569;font-weight:600">Cliente</th><td style="padding:6px 0">{{ pr.cli }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Serviço</th><td style="padding:6px 0">{{ pr.svc }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Equipamento</th><td style="padding:6px 0">{{ pr.equip }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Agendamento</th><td style="padding:6px 0">{{ pr.when }} · Horário de Cuiabá (UTC−4)</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Profissional</th><td style="padding:6px 0">{{ pr.proName }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Relato inicial</th><td style="padding:6px 0">{{ pr.relato }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Trabalho realizado</th><td style="padding:6px 0">{{ pr.work }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Observações</th><td style="padding:6px 0">{{ pr.obs }}</td></tr><tr><th scope="row" style="text-align:left;padding:6px 8px 6px 0;color:#475569;font-weight:600">Próximo retorno</th><td style="padding:6px 0">{{ pr.next }}</td></tr></tbody></table>
+            <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:10pt;color:#475569"><div style="border-top:1px solid #0F172A;padding-top:6px">Profissional</div><div style="border-top:1px solid #0F172A;padding-top:6px">Cliente</div></div>
+            <p style="margin:18px 0 0;font-size:9pt;color:#475569">Resumo de atendimento gerado pela EloServ. Não é documento fiscal, laudo técnico ou certificação. Dados demonstrativos.</p>
+          </article>
+        </sc-if>
+        <sc-if value="{{ m_prefs }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0 0 12px;font-size:18px">Tema e densidade</h2>
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Tema</div><div role="radiogroup" aria-label="Tema" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ themeOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:14px;font-weight:600;cursor:pointer"><i class="{{ o.icon }}" aria-hidden="true"></i>{{ o.l }}</button></sc-for></div>
+            <div style="font-size:13px;font-weight:600;margin:16px 0 6px">Densidade</div><div role="radiogroup" aria-label="Densidade" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ densOpts }}" as="o"><button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--r2);border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:14px;font-weight:600;cursor:pointer"><i class="{{ o.icon }}" aria-hidden="true"></i>{{ o.l }}</button></sc-for></div>
+            <p style="margin:12px 0 0;font-size:12px;color:var(--muted)">Preferências independentes, salvas neste navegador e aplicadas em todos os ambientes.</p></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Fechar</button></div>
+        </sc-if>
+        <sc-if value="{{ m_invite }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Convidar profissional</h2><p style="margin:6px 0 14px;font-size:14px;color:var(--text2)">A pessoa recebe um convite e só acessa após aceitar. Função inicial: técnico.</p><label for="in1" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Nome</label><input id="in1" value="{{ invN }}" onChange="{{ onInvN }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><label for="in2" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px">E-mail</label><input id="in2" type="email" value="{{ invM }}" onChange="{{ onInvM }}" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><sc-if value="{{ mErr }}"><p role="alert" style="margin:8px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if><p style="margin:12px 0 0;font-size:12px;color:var(--muted)">Serviços e jornada são configurados depois do aceite.</p></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doInvite }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Enviar convite</button></div>
+        </sc-if>
+        <sc-if value="{{ m_suspendPro }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Suspender acesso de {{ spN }}?</h2><p style="margin:6px 0 0;font-size:14px;color:var(--text2)">{{ spN }} tem {{ spFut }} atendimentos futuros. Eles continuam atribuídos e ficam sinalizados para revisão; nada é cancelado.</p><label for="sp" style="display:block;font-size:13px;font-weight:600;margin:14px 0 6px">Justificativa <span style="color:var(--err)">*</span></label><textarea id="sp" rows="2" value="{{ mtext }}" onChange="{{ onMtext }}" style="width:100%;padding:10px 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"></textarea><sc-if value="{{ mErr }}"><p role="alert" style="margin:6px 0 0;font-size:13px;color:var(--err)">{{ mErr }}</p></sc-if></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doSuspend }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:#B91C1C;color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Suspender</button></div>
+        </sc-if>
+        <sc-if value="{{ m_addCli }}">
+          <div style="padding:20px"><h2 id="m-title" style="margin:0;font-size:18px">Cliente atendido fora do catálogo</h2><p style="margin:6px 0 14px;font-size:14px;color:var(--text2)">Cria apenas um registro operacional da empresa. Nenhuma conta é criada; um convite só é enviado se você escolher e o cliente confirmar.</p><label for="ac1" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Nome</label><input id="ac1" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><label for="ac2" style="display:block;font-size:13px;font-weight:600;margin:12px 0 6px">Telefone</label><input id="ac2" type="tel" style="width:100%;min-height:var(--ctl);padding:0 12px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--field);color:var(--text);font-size:14px"><label style="display:flex;gap:10px;align-items:center;margin-top:12px;font-size:14px;min-height:40px"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--accent)">Enviar convite para o cliente acompanhar pela EloServ</label></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px"><button onClick="{{ closeModal }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">Cancelar</button><button onClick="{{ doAddCli }}" style="min-height:44px;padding:0 16px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Cadastrar</button></div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ helpOpen }}">
+    <div onClick="{{ closeHelp }}" style="position:fixed;inset:0;z-index:60;background:var(--overlay)"></div>
+    <aside role="dialog" aria-modal="true" aria-labelledby="hp-title" style="position:fixed;top:0;right:0;bottom:0;z-index:61;width:{{ helpW }};max-width:100%;background:var(--surface);border-left:1px solid var(--border-strong);box-shadow:var(--shadow);overflow:auto">
+      <div style="position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600;color:var(--text2);display:flex;gap:6px;align-items:center"><i class="ph ph-question" aria-hidden="true"></i>Ajuda</span><button onClick="{{ closeHelp }}" aria-label="Fechar ajuda" style="width:40px;height:40px;border:0;background:transparent;cursor:pointer;font-size:18px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+      <article style="padding:20px">
+        <h2 id="hp-title" style="margin:0;font-size:20px;line-height:1.3">{{ hArt.title }}</h2>
+        <p style="margin:8px 0 0;color:var(--text2)">{{ hArt.summary }}</p>
+        <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">Para: {{ hArt.aud }} · Atualizado em {{ hArt.upd }}</p>
+        <ol style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ hArt.steps }}" as="st"><li style="display:flex;gap:10px;font-size:14px"><span aria-hidden="true" style="flex-shrink:0;width:24px;height:24px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-size:12px;font-weight:700">{{ st.n }}</span>{{ st.t }}</li></sc-for></ol>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ hArt.notes }}" as="n"><li style="display:flex;gap:8px;padding:10px;border-radius:var(--r2);background:var(--raised);font-size:13px"><i class="ph ph-info" aria-hidden="true" style="margin-top:2px;color:var(--accent-text)"></i>{{ n }}</li></sc-for></ul>
+        <p style="margin:20px 0 0;padding:12px;border-radius:var(--r2);border:1px solid var(--border-strong);font-size:13px">{{ helpCtx }}</p>
+        <button onClick="{{ closeHelp }}" style="margin-top:12px;width:100%;min-height:44px;border-radius:var(--r2);border:1px solid transparent;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer">Voltar ao que eu estava fazendo</button>
+      </article>
+    </aside>
+  </sc-if>
+  <sc-if value="{{ toast }}">
+    <div role="status" aria-live="polite" style="position:fixed;z-index:70;bottom:20px;left:50%;transform:translateX(-50%);max-width:min(480px,calc(100% - 24px));display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r2);background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--shadow);font-size:14px"><i class="{{ toast.icon }}" aria-hidden="true" style="font-size:18px;color:{{ toast.fg }}"></i><span style="flex:1">{{ toast.msg }}</span><button aria-label="Fechar aviso" onClick="{{ closeToast }}" style="border:0;background:transparent;cursor:pointer;color:var(--text2);width:28px;height:28px"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const rawGet = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
+const TONE = { a: ['var(--accent-text)', 'var(--accent-soft)'], w: ['var(--warn)', 'var(--warn-soft)'], o: ['var(--ok)', 'var(--ok-soft)'], n: ['var(--neu)', 'var(--neu-soft)'], e: ['var(--err)', 'var(--err-soft)'] };
+const BADGES = { enviada: ['Enviada', 'ph-paper-plane-tilt', 'a'], em_analise: ['Em análise', 'ph-magnifying-glass', 'w'], proposta: ['Proposta enviada', 'ph-file-text', 'a'], aceita: ['Aceita', 'ph-check-circle', 'o'], recusada: ['Recusada', 'ph-x-circle', 'n'], cancelada: ['Cancelada', 'ph-prohibit', 'n'], expirada: ['Expirada', 'ph-hourglass', 'n'], temporaria: ['Reserva temporária', 'ph-hourglass', 'w'], confirmada: ['Confirmada', 'ph-check-circle', 'o'], bloqueio: ['Bloqueio interno', 'ph-lock-simple', 'n'], liberada: ['Liberada', 'ph-arrow-u-up-left', 'n'], semhorario: ['Sem horário reservado', 'ph-minus-circle', 'n'], agendada: ['Agendada', 'ph-calendar-check', 'a'], execucao: ['Em execução', 'ph-wrench', 'w'], concluida: ['Concluída', 'ph-check-circle', 'o'], ex_cancelada: ['Cancelada', 'ph-prohibit', 'n'], ativo: ['Ativo', 'ph-check-circle', 'o'], inativo: ['Inativo', 'ph-pause-circle', 'n'], arquivado: ['Arquivado', 'ph-archive', 'n'], convite: ['Convite pendente', 'ph-envelope-simple', 'w'], suspenso: ['Suspenso', 'ph-pause-circle', 'w'], revogado: ['Acesso revogado', 'ph-prohibit', 'n'] };
+const badge = k => { const b = BADGES[k] || ['—', 'ph-minus', 'n']; const t = TONE[b[2]]; return { label: b[0], icon: 'ph ' + b[1], fg: t[0], bg: t[1] }; };
+const TOAST = { ok: ['ph ph-check-circle', 'var(--ok)'], info: ['ph ph-info', 'var(--accent-text)'], warn: ['ph ph-warning', 'var(--warn)'] };
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const toT = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+const PROS0 = [
+  { id: 'carlos', n: 'Carlos Mendes', short: 'Carlos M.', role: 'Técnico', svcs: ['hig', 'prev', 'inst', 'diag'], status: 'ativo', mail: 'carlos.demo@exemplo.invalid', jor: 'Seg a sex · 07:30–17:30 · intervalo 12:00–13:00' },
+  { id: 'juliana', n: 'Juliana Rocha', short: 'Juliana R.', role: 'Técnica', svcs: ['hig', 'prev', 'diag'], status: 'ativo', mail: 'juliana.demo@exemplo.invalid', jor: 'Seg a sex · 07:30–17:30 · intervalo 12:00–13:00' },
+  { id: 'rafael', n: 'Rafael Teixeira', short: 'Rafael T.', role: 'Técnico', svcs: ['inst', 'hig', 'prev'], status: 'ativo', mail: 'rafael.demo@exemplo.invalid', jor: 'Seg a sex · 08:00–17:00 · intervalo 12:00–13:00 · folga 27/10' },
+  { id: 'bruno', n: 'Bruno Lima', short: 'Bruno L.', role: 'Técnico', svcs: ['hig'], status: 'convite', mail: 'bruno.demo@exemplo.invalid', jor: 'A configurar após aceite' }
+];
+const EV0 = [
+  { id: 'e1', pro: 'carlos', day: '26/10', s: '08:00', e: '09:30', k: 'confirmada', ref: 'OS-2201', t: 'Higienização de split', c: 'Paulo S.' },
+  { id: 'e2', pro: 'juliana', day: '26/10', s: '10:00', e: '12:00', k: 'confirmada', ref: 'OS-2202', t: 'Manutenção preventiva', c: 'Mercado Bom Preço (fictício)' },
+  { id: 'e3', pro: 'rafael', day: '26/10', s: '13:30', e: '16:30', k: 'confirmada', ref: 'OS-2203', t: 'Instalação de split', c: 'Lúcia F.' },
+  { id: 'e4', pro: 'carlos', day: '26/10', s: '13:30', e: '15:30', k: 'temporaria', ref: 'SOL-1040', t: 'Manutenção preventiva', c: 'Reserva até 25/10, 18:00' },
+  { id: 'e5', pro: 'carlos', day: '27/10', s: '08:00', e: '10:00', k: 'confirmada', ref: 'OS-2204', t: 'Manutenção preventiva', c: 'Restaurante Sabor (fictício)' },
+  { id: 'e6', pro: 'juliana', day: '27/10', s: '13:30', e: '15:30', k: 'confirmada', ref: 'OS-2206', t: 'Diagnóstico técnico', c: 'Marcos P.' },
+  { id: 'e7', pro: 'rafael', day: '27/10', s: '07:30', e: '17:30', k: 'bloqueio', ref: 'BLQ-07', t: 'Folga', c: 'Motivo interno' },
+  { id: 'e8', pro: 'carlos', day: '28/10', s: '13:30', e: '15:30', k: 'temporaria', ref: 'SOL-1038', t: 'Manutenção preventiva', c: 'Ana R. · aguardando cliente' },
+  { id: 'e9', pro: 'juliana', day: '28/10', s: '08:00', e: '09:30', k: 'confirmada', ref: 'OS-2209', t: 'Higienização de split', c: 'Teresa A.' },
+  { id: 'e10', pro: 'rafael', day: '28/10', s: '10:00', e: '13:00', k: 'confirmada', ref: 'OS-2207', t: 'Instalação de split', c: 'Clínica Vida (fictícia)' },
+  { id: 'e11', pro: 'carlos', day: '29/10', s: '08:00', e: '09:30', k: 'confirmada', ref: 'OS-2205', t: 'Higienização de split', c: 'Ana R.' },
+  { id: 'e12', pro: 'rafael', day: '29/10', s: '13:30', e: '15:00', k: 'confirmada', ref: 'OS-2208', t: 'Higienização de split', c: 'Jorge M.' },
+  { id: 'e13', pro: 'juliana', day: '30/10', s: '07:30', e: '17:30', k: 'bloqueio', ref: 'BLQ-08', t: 'Treinamento interno', c: 'Motivo interno' }
+];
+const H0 = 7, H1 = 18, PX = 56;
+const TIMES = []; for (let m = H0 * 60; m <= H1 * 60; m += 30) TIMES.push(toT(m));
+
+class Component extends DCLogic {
+  frameRef = React.createRef();
+  modalRef = React.createRef();
+  state = { route: '/empresas', w: 1200, fl: 0, frame: 'auto', theme: rawGet('eloserv.theme', 'dark'), density: rawGet('eloserv.density', 'comfort'), role: 'gestora', menu: false, umenu: false, notif: false, modal: null, busy: false, toast: null, help: null, ready: !!window.ELO,
+    pros: lsGet('eloserv.emp.pros', null) || PROS0, ev: lsGet('eloserv.emp.ev', null) || EV0, aday: '26/10', aview: null };
+  componentDidMount() {
+    this.applyTheme(this.state.theme, this.state.density);
+    this.hashH = () => { const r = (location.hash.slice(1) || '/empresas').split('?')[0]; this.setState({ route: r.startsWith('/empresas') ? r : '/empresas', menu: false, umenu: false, notif: false }); window.scrollTo(0, 0); };
+    window.addEventListener('hashchange', this.hashH); this.hashH();
+    const measure = () => { const el = this.frameRef.current; if (!el) return; const r = el.getBoundingClientRect(); const w = Math.round(r.width), fl = Math.round(r.left); if (w !== this.state.w || fl !== this.state.fl) this.setState({ w, fl }); };
+    this.ro = new ResizeObserver(measure); if (this.frameRef.current) this.ro.observe(this.frameRef.current); window.addEventListener('resize', measure); this.measure = measure; measure();
+    this.keyH = e => { if (e.key !== 'Escape') return; const s = this.state; if (s.help) this.setState({ help: null }); else if (s.modal && !s.busy) this.closeModal(); else this.setState({ menu: false, umenu: false, notif: false }); };
+    document.addEventListener('keydown', this.keyH);
+    if (!window.ELO) this.poll = setInterval(() => { if (window.ELO) { clearInterval(this.poll); this.setState({ ready: true }); } }, 50);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hashH); document.removeEventListener('keydown', this.keyH); window.removeEventListener('resize', this.measure); this.ro && this.ro.disconnect(); clearInterval(this.poll); }
+  componentDidUpdate() {
+    const s = this.state, ps = this._prev || {};
+    this._prev = Object.assign({}, s);
+    clearTimeout(this.selT); this.selT = setTimeout(() => document.querySelectorAll('select[data-v]').forEach(el => { if (el.value !== el.dataset.v) el.value = el.dataset.v; }), 0);
+    if (s.modal && s.modal !== ps.modal) setTimeout(() => { const m = this.modalRef.current; const el = m && m.querySelector('[data-autofocus],textarea,input,select,button'); el && el.focus(); }, 40);
+    if (!s.modal && ps.modal && this.lastFocus && this.lastFocus.focus) this.lastFocus.focus();
+    if (s.frame !== ps.frame) setTimeout(this.measure, 30);
+    if (s.pros !== ps.pros) lsSet('eloserv.emp.pros', s.pros);
+    if (s.ev !== ps.ev) lsSet('eloserv.emp.ev', s.ev);
+    if (s.reqs && s.reqs !== ps.reqs) lsSet('eloserv.emp.reqs', s.reqs);
+    if (s.oss && s.oss !== ps.oss) lsSet('eloserv.emp.oss', s.oss);
+  }
+  applyTheme(t, d) { const r = t === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t; document.documentElement.setAttribute('data-theme', r); document.documentElement.setAttribute('data-density', d); try { localStorage.setItem('eloserv.theme', t); localStorage.setItem('eloserv.density', d); } catch (e) {} }
+  go = p => { location.hash = p; };
+  openModal = (m, extra) => { this.lastFocus = document.activeElement; this.setState(Object.assign({ modal: m, busy: false, mErr: '' }, extra || {})); };
+  closeModal = () => this.setState({ modal: null, busy: false });
+  toast = (msg, kind) => { clearTimeout(this.tt); const k = TOAST[kind || 'ok']; this.setState({ toast: { msg, icon: k[0], fg: k[1] } }); this.tt = setTimeout(() => this.setState({ toast: null }), 5000); };
+  segOpts(list, cur, pick) { return list.map(([v, l, icon]) => ({ v, l, icon: 'ph ' + (icon || ''), on: cur === v, pick: () => pick(v), bg: cur === v ? 'var(--accent-soft)' : 'transparent', fg: cur === v ? 'var(--accent-text)' : 'var(--text2)', bd: cur === v ? 'var(--accent)' : 'var(--border-strong)' })); }
+  navItem(href, l, icon, route, exact, count) { const cur = exact ? route === href : route === href || route.startsWith(href + '/'); return { href: '#' + href, l, icon: 'ph ' + icon, cur: cur ? 'page' : undefined, fg: cur ? 'var(--accent-text)' : 'var(--text2)', bg: cur ? 'var(--accent-soft)' : 'transparent', count: count || 0 }; }
+  pro(id) { return this.state.pros.find(p => p.id === id) || { short: '—', n: '—' }; }
+  freeWins(pro, day, extra) {
+    const busy = this.state.ev.filter(e => e.pro === pro && e.day === day && e.id !== extra).map(e => [toMin(e.s), toMin(e.e)]).concat([[720, 780]]).sort((a, b) => a[0] - b[0]);
+    const wins = []; let cur = 450;
+    busy.forEach(([a, b]) => { if (a > cur) wins.push([cur, a]); cur = Math.max(cur, b); });
+    if (cur < 1050) wins.push([cur, 1050]);
+    return wins;
+  }
+  availFor(p, day, dur, prep) {
+    const dayEv = this.state.ev.filter(e => e.pro === p.id && e.day === day);
+    if (dayEv.some(e => e.k === 'bloqueio' && toMin(e.e) - toMin(e.s) >= 480)) return { st: 'Indisponível · ' + dayEv.find(e => e.k === 'bloqueio').t, times: [] };
+    const out = [];
+    for (let m = 450; m + dur <= 1050; m += 30) {
+      const a = m, b = m + dur;
+      if (a < 780 && b > 720) continue;
+      if (dayEv.some(e => a < toMin(e.e) + prep && toMin(e.s) < b + prep)) continue;
+      out.push(toT(m));
+    }
+    return { st: out.length ? out.length + ' horários' : 'Sem horários livres', times: out };
+  }
+  vmAgenda(base, seg, R, denied) {
+    R.agenda = !denied && seg[1] === 'agenda';
+    if (!R.agenda && this.state.modal !== 'block') return {};
+    const s = this.state, gest = base.isGestora, day = s.aday, view = s.aview || (base.isMob ? 'lista' : 'dia');
+    const pros = s.pros.filter(p => (p.status === 'ativo' || p.status === 'suspenso') && (gest || p.id === 'carlos'));
+    const evStyle = k => k === 'confirmada' ? { bg: 'var(--accent-soft)', bd: '1px solid var(--accent)', fg: 'var(--text)' } : k === 'temporaria' ? { bg: 'var(--warn-soft)', bd: '1px dashed var(--warn)', fg: 'var(--text)' } : { bg: 'repeating-linear-gradient(135deg,var(--neu-soft) 0 6px,transparent 6px 12px)', bd: '1px solid var(--border-strong)', fg: 'var(--text2)' };
+    const evVm = e => { const st = evStyle(e.k), b = badge(e.k); return Object.assign({}, e, { top: ((toMin(e.s) - H0 * 60) / 60 * PX) + 'px', h: Math.max(26, (toMin(e.e) - toMin(e.s)) / 60 * PX - 2) + 'px', bg: st.bg, bd: st.bd, fg: st.fg, kl: b.label, kicon: b.icon, kfg: b.fg, range: e.s + '–' + e.e, who: e.k === 'bloqueio' ? (gest ? e.c : 'Indisponível') : e.c, open: () => { if (e.k === 'confirmada') this.go('/empresas/ordens/' + e.ref); else if (e.k === 'temporaria' && gest) this.go('/empresas/solicitacoes/' + e.ref); else if (e.k === 'bloqueio' && gest) this.openModal('blkInfo', { blk: e }); }, aria: e.s + ' a ' + e.e + ', ' + b.label + ', ' + e.ref + ', ' + e.t }); };
+    const cols = pros.map(p => ({ id: p.id, n: p.short, susp: p.status === 'suspenso', evs: s.ev.filter(e => e.pro === p.id && e.day === day).map(evVm) }));
+    const pend = s.ev.filter(e => e.pro === 'pendente' && e.day === day);
+    if (gest && pend.length) cols.push({ id: 'pendente', n: 'A reatribuir', susp: false, evs: pend.map(evVm) });
+    const svc = s.aSvc || 'prev', sv = ELO.SVC[svc], dur = { hig: 90, inst: 180, prev: 120, diag: 60 }[svc], prep = 30;
+    const avail = s.pros.filter(p => p.status === 'ativo').map(p => { if (!p.svcs.includes(svc)) return { n: p.short, st: 'Não executa este serviço', times: [], none: true, has: false }; const a = this.availFor(p, day, dur, prep); return { n: p.short, st: a.st, times: a.times.slice(0, 8), more: a.times.length > 8 ? '+' + (a.times.length - 8) : '', none: a.times.length === 0, has: a.times.length > 0 }; });
+    const union = [...new Set(avail.flatMap(a => a.times))].sort();
+    const dd = ELO.DAYS.find(d => d.k === day);
+    return {
+      aDays: ELO.DAYS.map(d => ({ d: d.d, k: d.k, on: d.k === day ? 'true' : 'false', pick: () => this.setState({ aday: d.k }), bg: d.k === day ? 'var(--accent)' : 'var(--surface)', fg: d.k === day ? '#FFFFFF' : 'var(--text)', bd: d.k === day ? 'var(--accent)' : 'var(--border-strong)', n: s.ev.filter(e => e.day === d.k && e.k !== 'bloqueio' && (gest || e.pro === 'carlos')).length })),
+      aDayFull: dd.full, aViewOpts: this.segOpts([['dia', 'Dia por profissional', 'ph-columns'], ['lista', 'Lista', 'ph-list-bullets']], view, v => this.setState({ aview: v })),
+      vDia: view === 'dia', vLista: view === 'lista', hours: TIMES.filter(t => t.endsWith(':00') && t !== '18:00').map(t => ({ t, top: ((toMin(t) - H0 * 60) / 60 * PX) + 'px' })), gridH: ((H1 - H0) * PX) + 'px', cols, colMin: base.isDesk ? '180px' : '150px',
+      listGroups: cols.map(c => Object.assign({}, c, { empty: c.evs.length === 0 })), dayEmpty: cols.every(c => c.evs.length === 0),
+      showAvail: !!s.showAvail, toggleAvail: () => this.setState({ showAvail: !s.showAvail }), aSvc: svc, onASvc: e => this.setState({ aSvc: e.target.value }), aSvcOpts: ['hig', 'prev', 'inst', 'diag'].map(k => ({ v: k, l: ELO.SVC[k].name })), avail, union: union.join(' · ') || 'Nenhum horário disponível', aDur: sv.dur, aPrep: prep + ' min',
+      openBlock: () => this.openModal('block', { bPro: 'carlos', bDay: day === '26/10' ? '26/10' : day, bAll: false, bS: '13:00', bE: '15:00', bWhy: 'Manutenção do veículo', bConf: null }),
+      tz: ELO.TZ
+    };
+  }
+  reqList() {
+    let list = this.state.reqs || lsGet('eloserv.emp.reqs', null);
+    if (!list) list = [
+      { id: 'SOL-1040', cli: 'Roberto C.', svcKey: 'prev', svc: 'Manutenção preventiva', equip: 'Split 18.000 BTUs · Escritório', place: 'Escritório · Centro-Sul, Cuiabá', day: '26/10', slot: '13:30', when: 'Seg, 26/10/2026 · 13:30', sol: 'em_analise', occ: 'temporaria', hold: '25/10/2026, 18:00', desc: 'Aparelho do escritório desliga sozinho depois de uns 30 minutos ligado. Já trocamos as pilhas do controle.', pro: '', created: '24/10/2026 · 08:14', tl: [['24/10/2026 · 08:14', 'Solicitação recebida. Reserva temporária criada até 25/10, 18:00.'], ['24/10/2026 · 09:02', 'Marina D. iniciou a análise.']] },
+      { id: 'SOL-1038', cli: 'Ana R.', svcKey: 'prev', svc: 'Manutenção preventiva', equip: 'Split 12.000 BTUs · Sala', place: 'Casa · Jardim Itália, Cuiabá', day: '28/10', slot: '13:30', when: 'Qua, 28/10/2026 · 13:30', sol: 'proposta', occ: 'temporaria', hold: '27/10/2026, 18:00', desc: 'Aparelho da sala está fazendo barulho e pingando água na parede.', pro: 'carlos', created: '22/10/2026 · 09:12', tl: [['22/10/2026 · 09:12', 'Solicitação recebida.'], ['23/10/2026 · 08:05', 'Proposta enviada. Validade até 27/10, 18:00.']] },
+      { id: 'SOL-1035', cli: 'Hamburgueria Brasa (fictícia)', svcKey: 'diag', svc: 'Diagnóstico técnico', equip: 'Split piso-teto 36.000 BTUs', place: 'Loja · Porto, Cuiabá', day: '', slot: '', when: 'Sem horário definido', sol: 'recusada', occ: 'semhorario', hold: '', desc: 'Equipamento de 36.000 BTUs não gela.', pro: '', created: '19/10/2026 · 15:40', tl: [['19/10/2026 · 15:40', 'Solicitação recebida sem horário.'], ['20/10/2026 · 10:00', 'Recusada: equipamento fora da capacidade atendida pela equipe.']] },
+      { id: 'SOL-1033', cli: 'Denise V.', svcKey: 'hig', svc: 'Higienização de split', equip: 'Split 9.000 BTUs', place: 'Casa · Várzea Grande', day: '', slot: '', when: 'Ter, 20/10/2026 · 08:00', sol: 'expirada', occ: 'liberada', hold: '', desc: 'Higienização anual.', pro: '', created: '16/10/2026 · 11:20', tl: [['16/10/2026 · 11:20', 'Solicitação recebida.'], ['17/10/2026 · 18:00', 'Reserva temporária expirou sem proposta. Horário liberado.']] }
+    ];
+    const nr = lsGet('eloserv.demo.newreq', null);
+    if (nr && !list.some(x => x.id === nr.id)) { const m = /(\d\d\/\d\d)\/2026 · (\d\d:\d\d)/.exec(nr.when || ''); const k = Object.keys(ELO.SVC).find(k => ELO.SVC[k].name === nr.svc) || 'hig'; list = [{ id: nr.id, cli: 'Ana R.', svcKey: k, svc: nr.svc, equip: nr.equip, place: nr.place, day: m ? m[1] : '', slot: m ? m[2] : '', when: nr.when, sol: 'enviada', occ: m ? 'temporaria' : 'semhorario', hold: m ? '25/10/2026, 18:00' : '', desc: nr.desc, pro: '', created: '24/10/2026 · 10:42', tl: [['24/10/2026 · 10:42', 'Solicitação recebida pela área do cliente.']] }].concat(list); }
+    return list;
+  }
+  ossList() {
+    return this.state.oss || lsGet('eloserv.emp.oss', null) || EV0.filter(e => e.k === 'confirmada').map(e => ({ id: e.ref, cli: e.c, svc: e.t, equip: 'Split · ' + (e.c.includes('fict') ? 'Comercial' : 'Residencial'), when: ELO.DAYS.find(d => d.k === e.day).full + ' · ' + e.s + '–' + e.e, pro: e.pro, exec: 'agendada', relato: 'Relato informado na solicitação de origem.', obs: '', work: '', next: '', hist: [['Agendamento confirmado pelo cliente.', '—']] })).concat([{ id: 'OS-2190', cli: 'Teresa A.', svc: 'Manutenção preventiva', equip: 'Split 12.000 BTUs · Quarto', when: 'Qui, 15/10/2026 · 08:00–10:00', pro: 'juliana', exec: 'concluida', relato: 'Manutenção semestral.', obs: 'Cliente pediu aviso por telefone antes do próximo retorno.', work: 'Limpeza técnica, verificação de pressão e dreno. Funcionamento normal.', next: 'Abril de 2027', hist: [['Concluída por Juliana R.', '15/10/2026 · 10:05']] }, { id: 'OS-2188', cli: 'Paulo S.', svc: 'Diagnóstico técnico', equip: 'Split 9.000 BTUs', when: 'Ter, 13/10/2026 · 14:00–15:00', pro: 'carlos', exec: 'ex_cancelada', relato: '', obs: 'Cancelada pelo cliente com 24h de antecedência.', work: '', next: '', hist: [['Cancelada a pedido do cliente. Horário liberado.', '12/10/2026 · 13:00']] }]);
+  }
+  setReq(id, fn) { this.setState({ reqs: this.reqList().map(x => x.id === id ? fn(Object.assign({}, x)) : x) }); }
+  setOS(id, fn) { this.setState({ oss: this.ossList().map(x => x.id === id ? fn(Object.assign({}, x)) : x) }); }
+  now() { return '24/10/2026 · ' + new Date().toTimeString().slice(0, 5); }
+  proFreeAt(p, day, slot, dur, ref) {
+    if (!day || !slot) return { ok: true, st: 'Sem horário definido' };
+    const a = toMin(slot), b = a + dur, prep = 30;
+    const dayEv = this.state.ev.filter(e => e.pro === p.id && e.day === day && e.ref !== ref);
+    const blk = dayEv.find(e => e.k === 'bloqueio' && a < toMin(e.e) && toMin(e.s) < b);
+    if (blk) return { ok: false, st: 'Indisponível · ' + blk.t };
+    const hit = dayEv.find(e => a < toMin(e.e) + prep && toMin(e.s) < b + prep);
+    if (hit) return { ok: false, st: 'Ocupado · ' + hit.ref + ' ' + hit.s + '–' + hit.e + (a >= toMin(hit.e) ? ' (tempo de preparo)' : '') };
+    return { ok: true, st: 'Disponível no horário' };
+  }
+  vmReq(base, seg, R, denied) {
+    R.reqs = !denied && seg[1] === 'solicitacoes' && seg.length === 2; R.req = !denied && seg[1] === 'solicitacoes' && seg.length === 3;
+    if (!R.reqs && !R.req) return {};
+    const s = this.state, list = this.reqList();
+    const row = x => ({ id: x.id, cli: x.cli, svc: x.svc, when: x.when, href: '#/empresas/solicitacoes/' + x.id, solB: badge(x.sol), occB: badge(x.occ), hold: x.occ === 'temporaria' ? 'expira ' + x.hold : '', isNew: x.sol === 'enviada' });
+    const out = { rqRows: list.map(row) };
+    if (R.req) {
+      const x = list.find(q => q.id === seg[2]);
+      out.qMissing = !x; out.qOk = !!x;
+      if (x) {
+        const dur = { hig: 90, inst: 180, prev: 120, diag: 60 }[x.svcKey] || 90, v = ELO.SVC[x.svcKey];
+        const pick = s.qPro !== undefined && s.qFor === x.id ? s.qPro : x.pro;
+        const canEdit = ['enviada', 'em_analise'].includes(x.sol);
+        out.q = Object.assign({}, x, { solB: badge(x.sol), occB: badge(x.occ), tl: x.tl.slice().reverse().map(([t, d]) => ({ t, d })), canEdit, isProp: x.sol === 'proposta', isAc: x.sol === 'aceita', isClosed: ['recusada', 'expirada', 'cancelada'].includes(x.sol), hasHold: x.occ === 'temporaria', proName: x.pro ? this.pro(x.pro).short : 'Não atribuído', os: x.os || '', osHref: '#/empresas/ordens/' + (x.os || '') });
+        out.qPros = s.pros.filter(p => p.status === 'ativo').map(p => { const elig = p.svcs.includes(x.svcKey); const f = elig ? this.proFreeAt(p, x.day, x.slot, dur, x.id) : { ok: false, st: 'Não executa este serviço' }; const on = pick === p.id; return { id: p.id, n: p.short, st: f.st, ok: f.ok, dis: !f.ok, on, pick: () => this.setState({ qPro: p.id, qFor: x.id, qErr: '' }), bd: on ? 'var(--accent)' : 'var(--border-strong)', bg: on ? 'var(--accent-soft)' : 'transparent', stFg: f.ok ? 'var(--ok)' : 'var(--text2)', op: f.ok ? '1' : '.65' }; });
+        const pf = s.pForm && s.pForm.id === x.id ? s.pForm : { id: x.id, items: v.name + ' — ' + (v.kind === 'Sob orçamento' ? 'visita técnica R$ 90,00' : v.price), total: v.kind === 'Sob orçamento' ? 'R$ 90,00 (visita) + reparo a definir' : v.price, cond: 'Pagamento combinado diretamente com o cliente após o atendimento.', valid: '48 horas', obs: '' };
+        out.pf = pf; out.onPf = Object.fromEntries(['items', 'total', 'cond', 'valid', 'obs'].map(k => [k, e => this.setState({ pForm: Object.assign({}, pf, { [k]: e.target.value }) })]));
+        out.validOpts = ['24 horas', '48 horas', '72 horas'].map(l => ({ v: l, l }));
+        out.qErr = s.qErr || '';
+        out.qDur = v.dur;
+        out.sendProp = () => { if (!pick) { this.setState({ qErr: 'Atribua um profissional disponível antes de enviar a proposta.' }); return; } const p = this.pro(pick); this.setReq(x.id, q => { q.sol = 'proposta'; q.pro = pick; q.tl = q.tl.concat([[this.now(), 'Proposta enviada com ' + p.short + '. Validade: ' + pf.valid + '.']]); return q; }); if (x.day) this.setState({ ev: s.ev.filter(e => e.ref !== x.id).concat([{ id: 'r' + x.id, pro: pick, day: x.day, s: x.slot, e: toT(toMin(x.slot) + dur), k: 'temporaria', ref: x.id, t: x.svc, c: x.cli + ' · aguardando cliente' }]) }); this.toast('Proposta enviada. A reserva temporária segue até a resposta do cliente.'); };
+        out.simAccept = () => { if (s.busy) return; this.setState({ busy: true }); setTimeout(() => { const id = 'OS-2210'; const f = this.proFreeAt(this.pro(x.pro), x.day, x.slot, dur, x.id); if (!f.ok) { this.setState({ busy: false }); this.toast('Revalidação falhou: o profissional deixou de estar livre. Proponha outro horário.', 'warn'); return; } this.setReq(x.id, q => { q.sol = 'aceita'; q.occ = 'confirmada'; q.os = id; q.tl = q.tl.concat([[this.now(), 'Cliente confirmou. Horário revalidado e agendamento confirmado. Ordem ' + id + ' criada.']]); return q; }); const oss = this.ossList().filter(o => o.id !== id).concat([{ id, cli: x.cli, svc: x.svc, equip: x.equip, when: x.when + '–' + toT(toMin(x.slot || '08:00') + dur), pro: x.pro, exec: 'agendada', relato: x.desc, obs: '', work: '', next: '', hist: [['Criada a partir de ' + x.id + ' após confirmação do cliente.', this.now()]] }]); this.setState({ busy: false, oss, ev: this.state.ev.map(e => e.ref === x.id ? Object.assign({}, e, { k: 'confirmada', ref: id, c: x.cli }) : e) }); this.toast('Cliente confirmou (simulação). Ordem ' + id + ' criada.'); }, 1100); };
+        out.qBusy = !!s.busy;
+        out.askRefuse = () => this.openModal('refuseReq', { mid: x.id, mtext: '' });
+      }
+    }
+    return out;
+  }
+  vmOS(base, seg, R, denied) {
+    R.oss = !denied && seg[1] === 'ordens' && seg.length === 2; R.os = !denied && seg[1] === 'ordens' && seg.length === 3;
+    if (!R.oss && !R.os) return {};
+    const s = this.state, gest = base.isGestora, list = this.ossList().filter(o => gest || o.pro === 'carlos');
+    const out = { ossTitle: gest ? 'Ordens de serviço' : 'Meus atendimentos', osRows: list.map(o => ({ id: o.id, cli: o.cli, svc: o.svc, when: o.when, pro: this.pro(o.pro).short, b: badge(o.exec), href: '#/empresas/ordens/' + o.id })) };
+    if (R.os) {
+      const o = this.ossList().find(q => q.id === seg[2]);
+      const allowed = o && (gest || o.pro === 'carlos');
+      out.oMissing = !allowed; out.oOk = !!allowed;
+      if (allowed) {
+        const ed = s.osEd && s.osEd.id === o.id ? s.osEd : { id: o.id, work: o.work, obs: o.obs, next: o.next || '6 meses' };
+        out.o = Object.assign({}, o, { b: badge(o.exec), proName: this.pro(o.pro).n, hist: o.hist.slice().reverse().map(([a, b]) => ({ a, b })), isAg: o.exec === 'agendada', isEx: o.exec === 'execucao', isDone: o.exec === 'concluida', isCanc: o.exec === 'ex_cancelada', hasWork: !!o.work, hasNext: !!o.next && o.exec === 'concluida', hasObs: !!o.obs });
+        out.ed = ed; out.onEd = Object.fromEntries(['work', 'obs', 'next'].map(k => [k, e => this.setState({ osEd: Object.assign({}, ed, { [k]: e.target.value }), oErr: '' })]));
+        out.nextOpts = ['Sem retorno', '3 meses', '6 meses', '12 meses'].map(l => ({ v: l, l }));
+        out.oErr = s.oErr || '';
+        out.startOS = () => { this.setOS(o.id, q => { q.exec = 'execucao'; q.hist = q.hist.concat([['Execução iniciada por ' + (gest ? 'Marina D.' : 'Carlos M.') + '.', this.now()]]); return q; }); this.toast('Atendimento em execução.'); };
+        out.finishOS = () => { if (!ed.work.trim()) { this.setState({ oErr: 'Descreva o trabalho realizado para concluir.' }); return; } this.setOS(o.id, q => { q.exec = 'concluida'; q.work = ed.work; q.obs = ed.obs; q.next = ed.next === 'Sem retorno' ? '' : 'Em ' + ed.next + ' (a partir de 24/10/2026)'; q.hist = q.hist.concat([['Concluída. ' + (q.next ? 'Próximo retorno: ' + q.next + '.' : 'Sem retorno previsto.'), this.now()]]); return q; }); this.toast('Ordem concluída. Histórico atualizado.'); };
+        out.printOS = () => this.openModal('print', { printId: o.id });
+        out.saveObs = () => { this.setOS(o.id, q => { q.obs = ed.obs; q.work = ed.work; q.hist = q.hist.concat([['Observações atualizadas.', this.now()]]); return q; }); this.toast('Alterações salvas.'); };
+      }
+    }
+    return out;
+  }
+  vmPros(base, seg, R, denied) {
+    R.pros = !denied && seg[1] === 'profissionais' && seg.length === 2; R.proD = !denied && seg[1] === 'profissionais' && seg.length === 3;
+    if (!R.pros && !R.proD) return {};
+    const s = this.state;
+    const out = { proRows: s.pros.map(p => ({ id: p.id, n: p.n, role: p.role, svcs: p.svcs.map(k => ELO.SVC[k].name).join(', '), b: badge(p.status), href: '#/empresas/profissionais/' + p.id, fut: s.ev.filter(e => e.pro === p.id && e.k !== 'bloqueio').length })), invite: () => this.openModal('invite', { invN: '', invM: '' }) };
+    if (R.proD) {
+      const p = s.pros.find(x => x.id === seg[2]);
+      out.pMissing = !p; out.pOk = !!p;
+      if (p) {
+        const fut = s.ev.filter(e => e.pro === p.id && e.k !== 'bloqueio');
+        const choice = s.rvFor === p.id ? (s.rvCh || {}) : {};
+        const items = fut.map(e => {
+          const svcKey = Object.keys(ELO.SVC).find(k => ELO.SVC[k].name === e.t) || 'hig', dur = toMin(e.e) - toMin(e.s);
+          const opts = s.pros.filter(q => q.id !== p.id && q.status === 'ativo').map(q => { const elig = q.svcs.includes(svcKey); const f = elig ? this.proFreeAt(q, e.day, e.s, dur, e.ref) : { ok: false, st: 'não executa o serviço' }; return { v: q.id, l: q.short + (f.ok ? ' — disponível' : ' — ' + f.st.toLowerCase()), dis: !f.ok }; });
+          const cur = choice[e.id] || '';
+          return { id: e.id, ref: e.ref, t: e.t, when: ELO.DAYS.find(d => d.k === e.day).full + ' · ' + e.s + '–' + e.e, kl: badge(e.k).label, opts: [{ v: '', l: 'Escolher tratamento…', dis: false }].concat(opts).concat([{ v: 'reagendar', l: 'Combinar novo horário com o cliente', dis: false }]), cur, onPick: ev2 => this.setState({ rvFor: p.id, rvCh: Object.assign({}, choice, { [e.id]: ev2.target.value }) }), done: !!cur, pend: !cur };
+        });
+        const allDone = items.every(i => i.done), why = s.rvFor === p.id ? (s.rvWhy || '') : '';
+        Object.assign(out, {
+          p: Object.assign({}, p, { b: badge(p.status), svcTxt: p.svcs.map(k => ELO.SVC[k].name).join(', '), isActive: p.status === 'ativo', isRev: p.status === 'revogado', isInv: p.status === 'convite', isSusp: p.status === 'suspenso' }),
+          rvOpen: s.rvOpen === p.id, openRv: () => this.setState({ rvOpen: p.id, rvFor: p.id, rvCh: {}, rvWhy: '' }), closeRv: () => this.setState({ rvOpen: null }),
+          rvItems: items, rvHas: items.length > 0, rvNone: items.length === 0, rvPend: items.filter(i => i.pend).length, rvWhy: why, onRvWhy: e => this.setState({ rvFor: p.id, rvWhy: e.target.value }),
+          rvCan: allDone && why.trim().length >= 10, rvCant: !(allDone && why.trim().length >= 10),
+          rvHint: !allDone ? 'Defina o tratamento de todos os atendimentos futuros.' : why.trim().length < 10 ? 'Informe a justificativa (mínimo de 10 caracteres).' : 'Pronto para revogar.',
+          doRevoke: () => {
+            if (!(allDone && why.trim().length >= 10)) return;
+            const ev = s.ev.map(e => { const c = choice[e.id]; if (!c || e.pro !== p.id) return e; if (c === 'reagendar') return Object.assign({}, e, { pro: 'pendente', c: e.c + ' · reagendar com cliente' }); return Object.assign({}, e, { pro: c }); }).filter(e => !(e.pro === p.id && e.k === 'bloqueio' && false));
+            const oss = this.ossList().map(o => { const e = fut.find(f => f.ref === o.id); if (!e || !choice[e.id]) return o; const c = choice[e.id]; return Object.assign({}, o, { pro: c === 'reagendar' ? o.pro : c, hist: o.hist.concat([[c === 'reagendar' ? 'Profissional desvinculado; reagendamento a combinar com o cliente.' : 'Reatribuída para ' + this.pro(c).short + ' antes da revogação de acesso de ' + p.short + '.', this.now()]]) }); });
+            const audit = lsGet('eloserv.demo.audit', []); audit.unshift({ who: 'Marina D. (gestora, FrioVale)', when: this.now(), ent: 'Profissional ' + p.short, act: 'Acesso revogado', why });
+            lsSet('eloserv.demo.audit', audit);
+            this.setState({ ev, oss, pros: s.pros.map(x => x.id === p.id ? Object.assign({}, x, { status: 'revogado' }) : x), rvOpen: null });
+            this.toast('Acesso de ' + p.short + ' revogado. Histórico preservado e atendimentos tratados.');
+          },
+          askSuspend: () => this.openModal('suspendPro', { mid: p.id, mtext: '' }),
+          reactivate: () => { this.setState({ pros: s.pros.map(x => x.id === p.id ? Object.assign({}, x, { status: 'ativo' }) : x) }); this.toast('Acesso reativado.'); },
+          resend: () => this.toast('Convite reenviado (demonstração).', 'info'),
+          revokeInv: () => { this.setState({ pros: s.pros.map(x => x.id === p.id ? Object.assign({}, x, { status: 'revogado' }) : x) }); this.toast('Convite revogado.', 'info'); },
+          pHist: [['20/10/2026', 'Jornada atualizada por Marina D.'], ['02/09/2026', 'Vinculado à FrioVale como técnico.']].map(([a, b]) => ({ a, b }))
+        });
+      }
+    }
+    return out;
+  }
+  vmMisc(base, seg, R, denied) {
+    const s = this.state, sec = seg[1];
+    ['perfil', 'servicos', 'produtos', 'clientes', 'historico', 'ajuda', 'configuracoes'].forEach(k => R[k] = !denied && sec === k);
+    const out = {};
+    if (R.perfil) {
+      const st = s.coSt || 'ativa';
+      const info = { preenchimento: ['Cadastro em preenchimento', 'Complete os dados obrigatórios e envie para habilitação. O perfil público ainda não está visível.', 'n'], aguardando: ['Aguardando habilitação', 'A administração está analisando o cadastro. Você pode configurar serviços e equipe; o perfil público fica oculto até a habilitação.', 'w'], ativa: ['Ativa', 'Perfil público visível e recebendo solicitações. Habilitação cadastral não representa certificação técnica.', 'o'], suspensa: ['Suspensa', 'Perfil público oculto e novas solicitações bloqueadas. Atendimentos já confirmados continuam visíveis para tratamento. Motivo informado pela administração.', 'e'], arquivada: ['Arquivada', 'Empresa encerrada na plataforma. Histórico preservado em modo de leitura.', 'n'] }[st];
+      const t = TONE[info[2]];
+      Object.assign(out, { coOpts: this.segOpts([['preenchimento', 'Em preenchimento'], ['aguardando', 'Aguardando'], ['ativa', 'Ativa'], ['suspensa', 'Suspensa'], ['arquivada', 'Arquivada']], st, v => this.setState({ coSt: v })), coLbl: info[0], coTxt: info[1], coFg: t[0], coBg: t[1] });
+    }
+    if (R.servicos) {
+      const sv = s.svcs || lsGet('eloserv.emp.svcs', null) || [['hig', 'ativo', 14], ['inst', 'ativo', 6], ['prev', 'ativo', 11], ['diag', 'ativo', 4], ['camara', 'inativo', 2], ['gas', 'arquivado', 9]];
+      const name = k => k === 'gas' ? 'Recarga de gás (serviço antigo)' : ELO.SVC[k].name;
+      const q = (s.svQ || '').toLowerCase(), empty = !!s.svEmpty;
+      const rows = empty ? [] : sv.filter(([k]) => !q || name(k).toLowerCase().includes(q)).map(([k, st, n]) => ({ k, n: name(k), dur: k === 'gas' ? '1h' : ELO.SVC[k].dur, price: k === 'gas' ? '—' : (ELO.SVC[k].kind === 'Sob orçamento' ? 'Sob orçamento' : ELO.SVC[k].kind + ' ' + ELO.SVC[k].price), b: badge(st), uses: n + ' atendimentos no histórico', isAct: st === 'ativo', isIn: st === 'inativo', isArc: st === 'arquivado', notArc: st !== 'arquivado', note: st === 'inativo' ? 'Não aparece no perfil público.' : st === 'arquivado' ? 'Mantido por estar vinculado ao histórico.' : '', toggle: () => { const nv = sv.map(r => r[0] === k ? [k, st === 'ativo' ? 'inativo' : 'ativo', n] : r); lsSet('eloserv.emp.svcs', nv); this.setState({ svcs: nv }); this.toast(st === 'ativo' ? 'Serviço desativado. Deixa de aparecer no perfil público.' : 'Serviço ativado.'); }, archive: () => { const nv = sv.map(r => r[0] === k ? [k, 'arquivado', n] : r); lsSet('eloserv.emp.svcs', nv); this.setState({ svcs: nv }); this.toast('Serviço arquivado. O histórico foi preservado.', 'info'); } }));
+      Object.assign(out, { svRows: rows, svHas: rows.length > 0, svNone: !empty && rows.length === 0, svEmpty: empty, svQ: s.svQ || '', onSvQ: e => this.setState({ svQ: e.target.value }), toggleSvEmpty: () => this.setState({ svEmpty: !empty }), svEmptyLbl: empty ? 'Voltar aos dados demonstrativos' : 'Ver estado: empresa sem serviços' });
+    }
+    if (R.produtos) out.prRows = ELO.PRODS.map(p => Object.assign({}, p, { b: badge(p.avail.startsWith('Indisp') ? 'inativo' : 'ativo') }));
+    if (R.clientes) {
+      const first = ['Ana', 'Paulo', 'Lúcia', 'Roberto', 'Teresa', 'Jorge', 'Denise', 'Marcos', 'Helena', 'Igor', 'Sônia', 'Vítor'], last = ['R.', 'S.', 'F.', 'C.', 'A.', 'M.', 'V.', 'P.'], cities = ['Cuiabá', 'Várzea Grande'];
+      const all = Array.from({ length: 23 }, (_, i) => ({ n: i === 3 ? 'Condomínio Residencial Parque das Águas — Bloco B, administração (fictício)' : first[i % 12] + ' ' + last[(i * 3) % 8], city: cities[i % 2], eq: 1 + (i % 3), last: String(1 + (i * 7) % 28).padStart(2, '0') + '/' + (i % 2 ? '09' : '10') + '/2026', src: i % 4 === 1 ? 'Cadastro da empresa' : 'Conta EloServ' }));
+      const q = (s.clQ || '').toLowerCase(), list = all.filter(c => !q || c.n.toLowerCase().includes(q)), per = 8, pages = Math.max(1, Math.ceil(list.length / per)), pg = Math.min(s.clPg || 1, pages);
+      Object.assign(out, { clRows: list.slice((pg - 1) * per, pg * per), clQ: s.clQ || '', onClQ: e => this.setState({ clQ: e.target.value, clPg: 1 }), clInfo: list.length ? ((pg - 1) * per + 1) + '–' + Math.min(pg * per, list.length) + ' de ' + list.length : '0 resultados', clPrev: () => this.setState({ clPg: pg - 1 }), clNext: () => this.setState({ clPg: pg + 1 }), clNoPrev: pg <= 1, clNoNext: pg >= pages, clPages: Array.from({ length: pages }, (_, i) => ({ n: i + 1, cur: i + 1 === pg ? 'page' : undefined, pick: () => this.setState({ clPg: i + 1 }), bg: i + 1 === pg ? 'var(--accent)' : 'transparent', fg: i + 1 === pg ? '#FFFFFF' : 'var(--text)' })), addCli: () => this.openModal('addCli') });
+    }
+    if (R.historico) out.retRows = [['Teresa A.', 'Manutenção preventiva', 'Abril de 2027', 'OS-2190'], ['Paulo S.', 'Higienização de split', 'Novembro de 2026', 'OS-2172'], ['Mercado Bom Preço (fictício)', 'Manutenção preventiva', 'Novembro de 2026', 'OS-2165']].map(([c, sv, w, os]) => ({ c, sv, w, os, href: '#/empresas/ordens/' + os }));
+    if (R.ajuda) out.eArts = ELO.ARTS.map(a => ({ title: a.title, summary: a.summary, aud: a.aud, open: () => this.setState({ help: a.slug }) }));
+    if (R.configuracoes) Object.assign(out, { jorRows: s.pros.filter(p => p.status !== 'convite').map(p => ({ n: p.short, jor: p.jor, b: badge(p.status) })), durRows: ['hig', 'inst', 'prev', 'diag'].map(k => ({ n: ELO.SVC[k].name, dur: { hig: '90', inst: '180', prev: '120', diag: '60' }[k] })), saveCfg: () => this.toast('Configurações salvas. Novas disponibilidades já consideram as regras.'), tzOpts: [['America/Cuiaba', 'Cuiabá — UTC−4 (Mato Grosso)'], ['America/Sao_Paulo', 'Brasília — UTC−3 (GO, DF)'], ['America/Campo_Grande', 'Campo Grande — UTC−4 (MS)']].map(([v, l]) => ({ v, l })) });
+    return out;
+  }
+  vmModal(base) {
+    const s = this.state, m = s.modal, out = {};
+    const a = s.help ? ELO.ARTS.find(x => x.slug === s.help) : null;
+    Object.assign(out, { helpOpen: !!a, hArt: a ? { title: a.title, summary: a.summary, aud: a.aud, upd: a.upd, steps: a.steps.map((t, i) => ({ n: i + 1, t })), notes: a.notes } : {}, closeHelp: () => this.setState({ help: null }), helpW: Math.min(440, base.w) + 'px', helpCtx: m === 'block' ? 'Seu bloqueio em edição continua aberto. Feche este painel para voltar a ele.' : 'Feche este painel para voltar ao que estava fazendo.' });
+    out.modalOpen = !!m; if (!m) return out;
+    ['block', 'blkInfo', 'refuseReq', 'print', 'prefs', 'invite', 'suspendPro', 'addCli'].forEach(k => out['m_' + k] = m === k);
+    Object.assign(out, { closeModal: this.closeModal, mw: Math.min(m === 'print' ? 760 : 560, base.w - 24) + 'px', mtext: s.mtext || '', onMtext: e => this.setState({ mtext: e.target.value }), mErr: s.mErr || '', hideForPrint: m === 'print' ? 'true' : undefined });
+    if (m === 'block') {
+      const set = k => e => this.setState({ [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value, bConf: null, mErr: '' });
+      const conf = s.bConf;
+      Object.assign(out, {
+        b: { pro: s.bPro, day: s.bDay, all: !!s.bAll, notAll: !s.bAll, st: s.bS, en: s.bE, why: s.bWhy }, onB: { pro: set('bPro'), day: set('bDay'), all: set('bAll'), st: set('bS'), en: set('bE'), why: set('bWhy') },
+        bProOpts: s.pros.filter(p => p.status === 'ativo').map(p => ({ v: p.id, l: p.short })), bDayOpts: ELO.DAYS.map(d => ({ v: d.k, l: d.full })), timeOpts: TIMES.map(t => ({ v: t, l: t })),
+        bHasConf: !!conf, bConf: conf ? conf.items : [], bAlts: conf ? conf.alts : [], bNoAlts: conf ? conf.alts.length === 0 : false,
+        openBlockHelp: () => this.setState({ help: 'como-bloquear-periodo' }),
+        saveBlock: () => {
+          const st = s.bAll ? '07:30' : s.bS, en = s.bAll ? '17:30' : s.bE;
+          if (toMin(en) <= toMin(st)) { this.setState({ mErr: 'O fim deve ser depois do início.' }); return; }
+          if (!(s.bWhy || '').trim()) { this.setState({ mErr: 'Informe o motivo interno.' }); return; }
+          const a1 = toMin(st), b1 = toMin(en);
+          const hits = s.ev.filter(e => e.pro === s.bPro && e.day === s.bDay && a1 < toMin(e.e) && toMin(e.s) < b1);
+          if (hits.length) {
+            const dur = b1 - a1;
+            const alts = this.freeWins(s.bPro, s.bDay).filter(([x, y]) => y - x >= Math.min(dur, 60)).slice(0, 3).map(([x, y]) => { const e2 = Math.min(y, x + dur); return { l: toT(x) + '–' + toT(e2), pick: () => this.setState({ bAll: false, bS: toT(x), bE: toT(e2), bConf: null }) }; });
+            this.setState({ bConf: { items: hits.map(e => ({ l: e.ref + ' · ' + e.s + '–' + e.e + ' · ' + badge(e.k).label, href: e.k === 'temporaria' ? '#/empresas/solicitacoes/' + e.ref : '#/empresas/ordens/' + e.ref })), alts } });
+            return;
+          }
+          const n = s.ev.filter(e => e.k === 'bloqueio').length + 7;
+          this.setState({ ev: s.ev.concat([{ id: 'b' + Date.now(), pro: s.bPro, day: s.bDay, s: st, e: en, k: 'bloqueio', ref: 'BLQ-' + String(n).padStart(2, '0'), t: 'Bloqueio', c: s.bWhy }]), modal: null, aday: s.bDay, route: s.route });
+          this.toast('Período bloqueado. A agenda pública mostra apenas “Indisponível”.');
+          if (!s.route.startsWith('/empresas/agenda')) this.go('/empresas/agenda');
+        }
+      });
+    }
+    if (m === 'blkInfo') { const e = s.blk || {}; Object.assign(out, { blk: { ref: e.ref, t: e.t, c: e.c, when: e.day + ' · ' + e.s + '–' + e.e, pro: this.pro(e.pro).short }, removeBlk: () => { this.setState({ ev: s.ev.filter(x => x.id !== e.id), modal: null }); this.toast('Bloqueio removido. O período voltou a ficar disponível.'); } }); }
+    if (m === 'refuseReq') out.doRefuseReq = () => { const id = s.mid; this.setReq(id, q => { q.sol = 'recusada'; q.occ = 'liberada'; q.tl = q.tl.concat([[this.now(), 'Solicitação recusada pela empresa. Reserva liberada.' + (s.mtext ? ' Motivo: ' + s.mtext : '')]]); return q; }); this.setState({ ev: s.ev.filter(e => e.ref !== id), modal: null }); this.toast('Solicitação recusada. O horário foi liberado.', 'info'); };
+    if (m === 'print') { const o = this.ossList().find(x => x.id === s.printId) || {}; out.pr = Object.assign({}, o, { proName: this.pro(o.pro).n, b: badge(o.exec), hist: (o.hist || []).map(([a, b]) => ({ a, b })) }); out.doPrint = () => window.print(); }
+    if (m === 'invite') { out.invN = s.invN || ''; out.invM = s.invM || ''; out.onInvN = e => this.setState({ invN: e.target.value, mErr: '' }); out.onInvM = e => this.setState({ invM: e.target.value, mErr: '' }); out.doInvite = () => { if (!s.invN.trim() || !/@/.test(s.invM)) { this.setState({ mErr: 'Informe nome e e-mail válidos.' }); return; } this.setState({ pros: s.pros.concat([{ id: 'p' + Date.now(), n: s.invN, short: s.invN.split(' ')[0] + ' ' + ((s.invN.split(' ')[1] || '')[0] || '') + '.', role: 'Técnico', svcs: ['hig'], status: 'convite', mail: s.invM, jor: 'A configurar após aceite' }]), modal: null }); this.toast('Convite enviado. Ele aparece como pendente até o aceite.'); }; }
+    if (m === 'suspendPro') { const p = s.pros.find(x => x.id === s.mid) || {}; out.spN = p.short; out.spFut = s.ev.filter(e => e.pro === p.id && e.k !== 'bloqueio').length; out.doSuspend = () => { if ((s.mtext || '').trim().length < 10) { this.setState({ mErr: 'Informe a justificativa (mínimo de 10 caracteres).' }); return; } this.setState({ pros: s.pros.map(x => x.id === p.id ? Object.assign({}, x, { status: 'suspenso' }) : x), modal: null }); this.toast('Acesso suspenso. Atendimentos futuros continuam atribuídos e marcados para revisão.', 'warn'); }; }
+    if (m === 'addCli') out.doAddCli = () => { this.closeModal(); this.toast('Cliente cadastrado no registro operacional. Nenhuma conta foi criada.'); };
+    return out;
+  }
+  renderVals() {
+    const s = this.state, r = s.route, w = s.w, isMob = w < 640, isDesk = w >= 1024, gest = s.role === 'gestora';
+    const seg = r.split('/').filter(Boolean);
+    const frames = [['auto', 'Auto'], ['390', '390'], ['768', '768'], ['1440', '1440']];
+    const allowedTec = ['/empresas', '/empresas/agenda', '/empresas/ordens', '/empresas/ajuda'];
+    const sec = '/' + seg.slice(0, 2).join('/');
+    const denied = !gest && !allowedTec.includes(sec);
+    const R = { denied, home: !denied && r === '/empresas' };
+    const navDef = [['/empresas', 'Visão geral', 'ph-squares-four', 1], ['/empresas/perfil', 'Perfil da empresa', 'ph-storefront'], ['/empresas/servicos', 'Serviços', 'ph-wrench'], ['/empresas/produtos', 'Produtos', 'ph-package'], ['/empresas/profissionais', 'Profissionais', 'ph-users'], ['/empresas/agenda', 'Agenda', 'ph-calendar-blank'], ['/empresas/solicitacoes', 'Solicitações e orçamentos', 'ph-clipboard-text'], ['/empresas/ordens', 'Ordens de serviço', 'ph-file-text'], ['/empresas/clientes', 'Clientes e equipamentos', 'ph-address-book'], ['/empresas/historico', 'Histórico e retornos', 'ph-clock-counter-clockwise'], ['/empresas/ajuda', 'Ajuda', 'ph-question'], ['/empresas/configuracoes', 'Configurações', 'ph-gear']];
+    const base = {
+      R, isMob, notMob: !isMob, isDesk, notDesk: !isDesk, w, fl: s.fl, menu: s.menu, umenu: s.umenu, notif: s.notif, isGestora: gest, isTec: !gest,
+      frameRef: this.frameRef, modalRef: this.modalRef, routeTxt: r,
+      frameMax: s.frame === 'auto' ? 'none' : s.frame + 'px', frameBd: s.frame === 'auto' ? '0' : '1px dashed var(--border-strong)',
+      frameOpts: frames.map(([v, l]) => ({ l, on: s.frame === v, pick: () => this.setState({ frame: v }), bg: s.frame === v ? 'var(--accent)' : 'transparent', fg: s.frame === v ? '#FFFFFF' : 'var(--text2)' })),
+      roleOpts: [['gestora', 'Gestora'], ['tecnico', 'Técnico']].map(([v, l]) => ({ l, on: s.role === v, pick: () => this.setState({ role: v }), bg: s.role === v ? 'var(--accent)' : 'transparent', fg: s.role === v ? '#FFFFFF' : 'var(--text2)' })),
+      resetDemo: () => { ['eloserv.emp.pros', 'eloserv.emp.ev', 'eloserv.emp.reqs', 'eloserv.emp.oss', 'eloserv.emp.svcs'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} }); location.reload(); },
+      roleLbl: gest ? 'Proprietária e gestora' : 'Técnico', userName: gest ? 'Marina Duarte' : 'Carlos Mendes', userIni: gest ? 'MD' : 'CM', userMail: gest ? 'marina.demo@exemplo.invalid' : 'carlos.demo@exemplo.invalid',
+      eNav: navDef.filter(([h]) => gest || allowedTec.includes(h)).map(([h, l, i, ex]) => this.navItem(h, gest ? l : (h === '/empresas/agenda' ? 'Minha agenda' : h === '/empresas/ordens' ? 'Meus atendimentos' : l), i, r, !!ex, h === '/empresas/solicitacoes' && gest ? 2 : 0)),
+      crumb: denied ? 'Acesso restrito' : (navDef.find(([h]) => h === sec && h !== '/empresas') || [])[1] || '',
+      toggleMenu: () => this.setState({ menu: !s.menu }), closeMenu: () => this.setState({ menu: false }), menuOpen: !isDesk && s.menu,
+      toggleNotif: () => this.setState({ notif: !s.notif, umenu: false }), toggleUmenu: () => this.setState({ umenu: !s.umenu, notif: false }),
+      notifCount: gest ? 2 : 1,
+      notifs: (gest ? [['Nova solicitação', 'SOL-1040 · Manutenção preventiva', 'ph-paper-plane-tilt', '#/empresas/solicitacoes'], ['Convite pendente', 'Bruno L. ainda não aceitou o convite', 'ph-envelope-simple', '#/empresas/profissionais']] : [['Atendimento atribuído', 'OS-2201 · seg, 26/10 08:00', 'ph-calendar-check', '#/empresas/agenda']]).map(([t, d, ic, href]) => ({ t, d, icon: 'ph ' + ic, href })),
+      openPrefs: () => this.openModal('prefs'), openHelpCtx: () => this.setState({ help: r.startsWith('/empresas/agenda') ? 'como-bloquear-periodo' : r.startsWith('/empresas/profissionais') ? 'como-convidar-profissional' : 'como-reagendar', umenu: false }),
+      themeOpts: this.segOpts([['system', 'Sistema', 'ph-desktop'], ['light', 'Claro', 'ph-sun'], ['dark', 'Escuro', 'ph-moon']], s.theme, t => { this.setState({ theme: t }); this.applyTheme(t, s.density); }),
+      densOpts: this.segOpts([['comfort', 'Conforto', 'ph-rows'], ['compact', 'Compacto', 'ph-list-dashes']], s.density, d => { this.setState({ density: d }); this.applyTheme(s.theme, d); }),
+      toast: s.toast, closeToast: () => this.setState({ toast: null }),
+      kpis: [], actions: [], noActions: true, upcoming: []
+    };
+    if (!window.ELO) return base;
+    const ev = s.ev;
+    const reqN = this.reqList ? this.reqList().filter(x => ['enviada', 'em_analise'].includes(x.sol)).length : 2;
+    Object.assign(base, {
+      kpis: gest ? [[reqN, 'Solicitações aguardando resposta', '#/empresas/solicitacoes', 'var(--warn)'], [0, 'Atendimentos hoje', '#/empresas/agenda', 'var(--text)'], [1, 'Propostas aguardando cliente', '#/empresas/solicitacoes', 'var(--accent-text)'], [ev.filter(e => e.k === 'confirmada').length, 'Agendados nesta semana', '#/empresas/agenda', 'var(--text)'], [2, 'Retornos previstos em 30 dias', '#/empresas/historico', 'var(--text)']].map(([n, l, href, fg]) => ({ n, l, href, fg })) : [[ev.filter(e => e.pro === 'carlos' && e.k === 'confirmada').length, 'Meus atendimentos nesta semana', '#/empresas/agenda', 'var(--text)'], [0, 'Atendimentos hoje', '#/empresas/agenda', 'var(--text)']].map(([n, l, href, fg]) => ({ n, l, href, fg })),
+      actions: (gest ? [['ph-paper-plane-tilt', 'var(--warn)', 'SOL-1040 aguarda proposta', 'Reserva temporária expira em 25/10, 18:00', '#/empresas/solicitacoes/SOL-1040'], ['ph-warning', 'var(--err)', 'Conflito a revisar: seg, 26/10 13:30', 'Reserva temporária de Carlos M. sobreposta a um pedido de bloqueio', '#/empresas/agenda'], ['ph-envelope-simple', 'var(--warn)', 'Convite pendente: Bruno L.', 'Enviado em 20/10/2026', '#/empresas/profissionais'], ['ph-file-text', 'var(--accent-text)', 'SOL-1038 aguarda o cliente', 'Proposta válida até 27/10, 18:00', '#/empresas/solicitacoes/SOL-1038']] : [['ph-calendar-check', 'var(--accent-text)', 'Próximo: seg, 26/10 08:00', 'OS-2201 · Higienização de split', '#/empresas/ordens/OS-2201']]).map(([ic, fg, t, d, href]) => ({ icon: 'ph ' + ic, fg, t, d, href })),
+      upcoming: ev.filter(e => e.k === 'confirmada' && (gest || e.pro === 'carlos')).slice(0, 6).map(e => ({ when: e.day + ' · ' + e.s, label: e.ref + ' · ' + e.t, pro: this.pro(e.pro).short, href: '#/empresas/ordens/' + e.ref }))
+    });
+    base.noActions = base.actions.length === 0;
+    ['vmAgenda', 'vmReq', 'vmOS', 'vmPros', 'vmMisc', 'vmModal'].forEach(f => { if (this[f]) Object.assign(base, this[f](base, seg, R, denied)); });
+    return base;
+  }
+}
+</script>
+</body>
+</html>
