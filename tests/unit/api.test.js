@@ -18,7 +18,7 @@ import { acessoRota } from '../../src/domain/permissoes.js';
 const F = 'America/Cuiaba';
 const ALVO = paraUtc('2026-10-24', '10:00', F);
 const em = (data, hora) => new Date(paraUtc(data, hora, F)).toISOString();
-const D0 = '2026-10-26', D2 = '2026-10-28', D3 = '2026-10-29', D4 = '2026-10-30';
+const D0 = '2026-10-26', D2 = '2026-10-28', D4 = '2026-10-30';
 const ANA = { ator: 'u-ana' }, MARINA = { ator: 'u-marina' };
 const sol = id => ler().solicitacoes.find(s => s.id === id);
 const ocup = id => ler().ocupacoes.find(o => o.id === id);

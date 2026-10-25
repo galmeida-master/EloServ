@@ -110,7 +110,7 @@ export async function cadastrar(dados) {
     let empresaId = null;
     if (dados.tipo === 'empresa') {
       empresaId = 'emp-' + tx.seq('empresa');
-      const slug = String(dados.empresaNome).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + tx.estado.meta.seq.empresa;
+      const slug = String(dados.empresaNome).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + tx.estado.meta.seq.empresa;
       tx.inserir('empresas', {
         id: empresaId, slug, nome: dados.empresaNome.trim(), razaoSocial: '', cnpj: dados.cnpj.trim(), cidade: dados.cidade.trim(), area: [dados.cidade.trim()],
         categorias: [], modalidades: ['Residencial'], situacao: 'aguardando', descricao: '', horarios: 'Seg a sex 07:30–17:30',

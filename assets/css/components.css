@@ -392,7 +392,7 @@ details.faq p { padding: 0 0 14px; color: var(--text2); }
 .ev-bloqueio, .ev-folga { background: repeating-linear-gradient(135deg, var(--neu-soft) 0 6px, transparent 6px 12px); border: 1px solid var(--border-strong); }
 .ev-pendente { background: var(--err-soft); border: 1px dashed var(--err); }
 .ev-intervalo { background: var(--raised); border: 1px solid var(--border); }
-.agenda-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r3); background: var(--surface); }
+.agenda-scroll { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border); border-radius: var(--r3); background: var(--surface); }
 .agenda-hint { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .agenda-grid { display: grid; min-width: max-content; }
 .ag-col-head { position: sticky; top: 0; background: var(--raised); border-bottom: 1px solid var(--border); padding: 8px 10px; font-weight: 600; font-size: 14px; min-height: 44px; display: flex; align-items: center; gap: 6px; }
@@ -403,7 +403,7 @@ details.faq p { padding: 0 0 14px; color: var(--text2); }
 .ag-hline { position: absolute; left: 0; right: 0; border-top: 1px solid var(--border); }
 .ag-ev {
   position: absolute; left: 4px; right: 4px; border-radius: var(--r2); padding: 4px 6px; overflow: hidden; text-align: left; color: var(--text);
-  font-size: 12px; line-height: 1.3; display: flex; flex-direction: column; gap: 1px; cursor: pointer;
+  font-size: 12px; line-height: 1.3; display: flex; flex-direction: column; gap: 1px; cursor: pointer; text-decoration: none;
 }
 .ag-ev.static { cursor: default; }
 .ag-ev .r { font-weight: 600; font-variant-numeric: tabular-nums; }

@@ -1,10 +1,11 @@
 // Valores monetários em centavos (inteiros) e textos de preço. A EloServ não processa pagamentos.
 
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const ESPACO_RIGIDO = new RegExp(String.fromCharCode(160), 'g');
 
 /** 22000 → 'R$ 220,00' (com espaço comum). */
 export function formatarMoeda(centavos) {
-  return BRL.format(centavos / 100).replace(/ /g, ' ');
+  return BRL.format(centavos / 100).replace(ESPACO_RIGIDO, ' ');
 }
 
 /** '1.180,50' | '220' | 'R$ 35,00' → centavos; null quando inválido ou vazio. */
